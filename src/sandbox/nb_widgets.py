@@ -3,7 +3,7 @@ from __future__ import annotations
 import sys
 from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, TypeAlias, cast
 
 import numpy as np
 
@@ -13,12 +13,17 @@ try:
 except Exception:  # SymPy missing or not importable
     sp = None  # type: ignore
 
+NumericFunc = Callable[[np.ndarray], np.ndarray]
+
 if TYPE_CHECKING:
     from ipywidgets import Widget as IpyWidget
     from sympy import Expr as SymExpr
+
+    SymOrCallable: TypeAlias = SymExpr | NumericFunc
 else:
     IpyWidget = Any
     SymExpr = Any
+    SymOrCallable = NumericFunc | Any
 
 
 # ---------- Ensure "<repo>/src" on sys.path so imports work from any notebook ----------
@@ -79,10 +84,7 @@ def notebook_setup() -> None:
 
 
 # ---------- Utilities: coerce to numeric f and f' ----------
-def _coerce_univariate(sym_or_callable: SymExpr | Callable[[np.ndarray], np.ndarray]) -> tuple[
-    Callable[[np.ndarray], np.ndarray],
-    Callable[[np.ndarray], np.ndarray],
-]:
+def _coerce_univariate(sym_or_callable: SymOrCallable) -> tuple[NumericFunc, NumericFunc]:
     """
     Accept a SymPy expression in x OR a Python callable f(x).
     Return (f, fprime) as numpy-callables.
@@ -115,7 +117,7 @@ def _coerce_univariate(sym_or_callable: SymExpr | Callable[[np.ndarray], np.ndar
 
 # ---------- Tangent line widget (single output, smooth updates) ----------
 def tangent_widget(
-    func: SymExpr | Callable[[np.ndarray], np.ndarray],
+    func: SymOrCallable,
     a_init: float = 1.0,
     xmin: float = -4.0,
     xmax: float = 4.0,
