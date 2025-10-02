@@ -3,7 +3,7 @@ from __future__ import annotations
 import sys
 from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, TypeAlias
+from typing import TYPE_CHECKING, Any, TypeAlias, cast
 
 import numpy as np
 
@@ -17,9 +17,9 @@ if TYPE_CHECKING:
     import ipywidgets as ipywidgets
     import sympy as sympy_types  # type: ignore
 
-    SymExprType = sympy_types.Expr
+    SymExprType: TypeAlias = sympy_types.Expr
 else:
-    SymExprType = object  # fallback type
+    SymExprType: TypeAlias = Any
 
 SymOrCallable: TypeAlias = SymExprType | Callable[[np.ndarray], np.ndarray]
 
@@ -98,9 +98,9 @@ def _coerce_univariate(sym_or_callable: SymOrCallable) -> tuple[
         f_expr = sym_or_callable  # type: ignore[assignment]
         fprime_expr = sp.diff(f_expr, sym_x)  # type: ignore[misc]
 
-    f_sym = sp.lambdify(sym_x, f_expr, modules="numpy")  # type: ignore[misc]
-    fprime_sym = sp.lambdify(sym_x, fprime_expr, modules="numpy")  # type: ignore[misc]
-    return f_sym, fprime_sym
+        f_sym = sp.lambdify(sym_x, f_expr, modules="numpy")  # type: ignore[misc]
+        fprime_sym = sp.lambdify(sym_x, fprime_expr, modules="numpy")  # type: ignore[misc]
+        return f_sym, fprime_sym
 
     if not callable(sym_or_callable):
         raise TypeError("Expected a SymPy expression or a Python callable f(x).")
@@ -162,14 +162,17 @@ def tangent_widget(
     backend = matplotlib.get_backend().lower()
     is_widget = "widget" in backend  # ipympl (live canvas)
 
+    body: Any
     if is_widget:
-        body = fig.canvas  # live canvas widget
+        body = cast(Any, fig.canvas)  # live canvas widget
+        output_container: w.Output | None = None
     else:
         out = w.Output()
         # Render once into the Output (still inside notebook, but not auto)
         with out:
             display(fig)
         body = out  # we'll re-populate on updates
+        output_container = out
 
     def update(a: float) -> None:
         aa = float(a)
@@ -181,10 +184,10 @@ def tangent_widget(
         ax.set_title(f"Tangent at a={aa:.2f}")
         if is_widget:
             fig.canvas.draw_idle()
-        else:
+        elif output_container is not None:
             # Re-draw into the Output container
-            with body:  # type: ignore[assignment]
-                body.clear_output(wait=True)  # type: ignore[attr-defined]
+            with output_container:
+                output_container.clear_output(wait=True)
                 display(fig)
 
     slider = w.FloatSlider(
