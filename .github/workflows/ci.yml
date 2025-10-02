@@ -1,10 +1,11 @@
 name: ci
 
-on:
+"on":
   pull_request:
-    branches: [ "**" ]
+    branches: ["**"]
   push:
-    branches: [ "main" ]
+    branches: ["main"]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -46,7 +47,7 @@ jobs:
       checks_ok: ${{ steps.result.outputs.ok }}
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
+        with: {fetch-depth: 0}
 
       - name: Detect changed Python files
         id: changes
@@ -58,7 +59,7 @@ jobs:
             **/*.ipynb
 
       - uses: actions/setup-python@v5
-        with: { python-version: '3.10' }
+        with: {python-version: '3.10'}
 
       - name: Install deps
         run: |
@@ -108,7 +109,7 @@ jobs:
           fetch-depth: 0
 
       - uses: actions/setup-python@v5
-        with: { python-version: '3.10' }
+        with: {python-version: '3.10'}
 
       - name: Install deps
         run: |
@@ -134,11 +135,7 @@ jobs:
               exit 0
             fi
             # Ask GitHub Models (Grok-3 → fallback Grok-3 mini) for unified diff patch
-            PROMPT=$(cat <<'EOF'
-You are a code-fixing agent. Read the error log and propose a minimal UNIFIED DIFF patch
-that fixes the issues. Only output the patch. Do not include explanations.
-EOF
-)
+            PROMPT="You are a code-fixing agent. Read the error log and propose a minimal UNIFIED DIFF patch that fixes the issues. Only output the patch. Do not include explanations."
             RESP=$(gh api \
               -H "X-GitHub-Api-Version: 2023-07-07" \
               -X POST /models/generate \
@@ -192,7 +189,7 @@ EOF
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: '3.10' }
+        with: {python-version: '3.10'}
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
