@@ -33,7 +33,7 @@ quote-style = "double"
 profile = "black"
 
 [tool.pytest.ini_options]
-addopts = "-q --testmon --testmon-no-blacklist"
+addopts = "-q --testmon"
 testpaths = ["tests"]
 pythonpath = ["src"]
 
