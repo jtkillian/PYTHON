@@ -1,0 +1,6 @@
+{
+    "overrides": [
+        { "files": "*.md", "options": { "proseWrap": "always" } },
+        { "files": "*.json", "options": { "tabWidth": 2 } }
+    ]
+}

@@ -1,0 +1,37 @@
+name: trufflehog
+
+on:
+  pull_request:
+    branches: [ "**" ]
+  schedule:
+    - cron: "0 */4 * * *"
+  workflow_dispatch:
+
+jobs:
+  scan-pr:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Changed files
+        id: changes
+        uses: tj-actions/changed-files@v45
+        with:
+          since_last_remote_commit: true
+      - name: Run TruffleHog (changed files only)
+        if: steps.changes.outputs.any_changed == 'true'
+        uses: trufflesecurity/trufflehog@v3
+        with:
+          path: .
+          extra_args: "--only-verified"
+  scan-scheduled:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: trufflesecurity/trufflehog@v3
+        with:
+          path: .
+          extra_args: "--only-verified"

@@ -1,0 +1,16 @@
+{
+    "version": "0.2",
+    "dictionaryDefinitions": [
+        { "name": "matlab", "path": "./.vscode/dicts/matlab.txt" },
+        { "name": "python", "path": "./.vscode/dicts/python.txt" }
+    ],
+    "dictionaries": ["matlab", "python"],
+    "ignorePaths": [
+        "data/**",
+        ".git/**",
+        "node_modules/**",
+        "dist/**",
+        "__pycache__/**",
+        ".ipynb_checkpoints/**"
+    ]
+}

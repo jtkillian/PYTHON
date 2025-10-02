@@ -1,0 +1,210 @@
+name: ci
+
+on:
+  pull_request:
+    branches: [ "**" ]
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  gate:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.eval.outputs.should_run }}
+      same_repo: ${{ steps.eval.outputs.same_repo }}
+    steps:
+      - name: Evaluate PR author/branch for AI/bot and repo origin
+        id: eval
+        run: |
+          AUTHOR="${{ github.event.pull_request.user.login }}"
+          HEADREF="${{ github.event.pull_request.head.ref }}"
+          BASE_REPO="${{ github.event.pull_request.base.repo.full_name }}"
+          HEAD_REPO="${{ github.event.pull_request.head.repo.full_name }}"
+          if echo "$AUTHOR" | grep -Ei 'copilot|codex|bot'; then OK=1; fi
+          if echo "$HEADREF" | grep -Ei '^(bot|bots)/|copilot|codex'; then OK=1; fi
+          if [ "${OK:-0}" = "1" ]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_run=false" >> $GITHUB_OUTPUT
+          fi
+          if [ "$BASE_REPO" = "$HEAD_REPO" ]; then
+            echo "same_repo=true" >> $GITHUB_OUTPUT
+          else
+            echo "same_repo=false" >> $GITHUB_OUTPUT
+          fi
+
+  pr-fast:
+    if: github.event_name == 'pull_request' && needs.gate.outputs.should_run == 'true'
+    needs: gate
+    runs-on: ubuntu-latest
+    outputs:
+      checks_ok: ${{ steps.result.outputs.ok }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Detect changed Python files
+        id: changes
+        uses: tj-actions/changed-files@v45
+        with:
+          files: |
+            **/*.py
+            pyproject.toml
+            **/*.ipynb
+
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.10' }
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff black mypy pytest pytest-testmon
+          pip install -e .
+
+      - name: Lint (ruff) on changed files
+        if: steps.changes.outputs.any_changed == 'true'
+        run: |
+          ruff check ${{ steps.changes.outputs.all_changed_files }}
+
+      - name: Format check (black)
+        run: black --check .
+
+      - name: Type check (mypy) on changed files
+        if: steps.changes.outputs.any_changed == 'true'
+        run: |
+          mypy ${{ steps.changes.outputs.all_changed_files }}
+
+      - name: Tests (pytest + testmon; impacted)
+        id: tests
+        run: pytest -q
+
+      - name: Set result
+        id: result
+        run: |
+          if [ "${{ steps.tests.outcome }}" = "success" ]; then
+            echo "ok=true" >> $GITHUB_OUTPUT
+          else
+            echo "ok=false" >> $GITHUB_OUTPUT
+          fi
+
+  ai-autofix:
+    if: needs.pr-fast.result == 'success' && needs.pr-fast.outputs.checks_ok == 'false' && needs.gate.outputs.same_repo == 'true'
+    needs: [gate, pr-fast]
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_MODELS_TOKEN }}
+      OWNER: ${{ github.repository_owner }}
+      REPO: ${{ github.event.repository.name }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.10' }
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff black mypy pytest pytest-testmon
+
+      - name: Autofix loop (up to 5)
+        id: loop
+        run: |
+          set -e
+          for i in 1 2 3 4 5; do
+            echo "Attempt $i..."
+            # Re-run fast checks to get fresh errors
+            ERR_LOG="err.txt"
+            (ruff check . && black --check . && mypy . && pytest -q) > ok.txt 2> "$ERR_LOG" && OK=1 || OK=0
+            if [ "$OK" = "1" ]; then
+              echo "result=clean" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+            if [ -z "${GH_TOKEN}" ]; then
+              echo "No GH_TOKEN; skipping AI autofix."
+              echo "result=failed" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+            # Ask GitHub Models (Grok-3 → fallback Grok-3 mini) for unified diff patch
+            PROMPT=$(cat <<'EOF'
+You are a code-fixing agent. Read the error log and propose a minimal UNIFIED DIFF patch
+that fixes the issues. Only output the patch. Do not include explanations.
+EOF
+)
+            RESP=$(gh api \
+              -H "X-GitHub-Api-Version: 2023-07-07" \
+              -X POST /models/generate \
+              -f model='x.ai/grok-3' \
+              -f input@"$ERR_LOG" \
+              -f prompt="$PROMPT" 2>/dev/null || true)
+            if [ -z "$RESP" ]; then
+              RESP=$(gh api -H "X-GitHub-Api-Version: 2023-07-07" -X POST /models/generate \
+                -f model='x.ai/grok-3-mini' -f input@"$ERR_LOG" -f prompt="$PROMPT" 2>/dev/null || true)
+            fi
+            echo "$RESP" > ai.json || true
+            PATCH=$(jq -r '.output // empty' ai.json)
+            if [ -z "$PATCH" ]; then
+              echo "AI returned no patch"
+              continue
+            fi
+            echo "$PATCH" > fix.patch
+            # Try to apply patch
+            git apply --index fix.patch || true
+            if git diff --staged --quiet; then
+              echo "Patch applied no changes."
+              continue
+            fi
+            git config user.name "ai-autofix-bot"
+            git config user.email "ai-autofix-bot@users.noreply.github.com"
+            git commit -m "ci(autofix): apply AI patch (attempt $i)"
+            git push origin HEAD:${{ github.event.pull_request.head.ref }}
+          done
+          echo "result=failed" >> $GITHUB_OUTPUT
+
+  notify:
+    if: |
+      (needs.pr-fast.result == 'success' && needs.pr-fast.outputs.checks_ok == 'true') ||
+      (needs.ai-autofix.result == 'success' && needs.ai-autofix.outputs.result == 'clean')
+    needs: [pr-fast, ai-autofix]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comment success
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = "✅ Checks are passing. @${{ github.event.pull_request.user.login }}, please review and merge.";
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ github.event.pull_request.number }},
+              body
+            })
+
+  push-main-full:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/main')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.10' }
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff black mypy pytest pytest-testmon
+          pip install -e .
+      - name: Lint
+        run: ruff check .
+      - name: Format check
+        run: black --check .
+      - name: Type check
+        run: mypy .
+      - name: Tests
+        run: pytest -q

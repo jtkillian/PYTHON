@@ -1,0 +1,48 @@
+{
+  "python.defaultInterpreterPath": "${env:USERPROFILE}\\miniconda3\\envs\\py310\\python.exe",
+  "python.analysis.typeCheckingMode": "basic",
+  "python.languageServer": "Pylance",
+  "python.terminal.activateEnvironment": true,
+
+  "editor.fontFamily": "Fira Code Retina",
+  "editor.fontLigatures": true,
+  "editor.fontSize": 12,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "ms-python.black-formatter",
+  "editor.guides.bracketPairs": "active",
+
+  "black-formatter.interpreter": [
+    "${env:USERPROFILE}\\miniconda3\\envs\\py310\\python.exe"
+  ],
+  "black-formatter.importStrategy": "fromEnvironment",
+
+  // --- Terminal setup: always launch into conda py310 ---
+  "terminal.integrated.inheritEnv": true,
+  "terminal.integrated.profiles.windows": {
+    "Conda (py310)": {
+      "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "args": ["-NoExit", "-Command", "conda activate py310"]
+    }
+  },
+  "terminal.integrated.defaultProfile.windows": "Conda (py310)",
+
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.formatOnSave": true
+  },
+  "[markdown]": { "editor.defaultFormatter": "yzhang.markdown-all-in-one" },
+  "[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[jsonc]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestArgs": ["tests"],
+
+  "editor.codeActionsOnSave": {
+    "source.organizeImports.ruff": "explicit",
+    "source.fixAll.ruff": "explicit"
+  },
+
+  "cSpell.enabled": true,
+  "todo-tree.general.tags": ["TODO", "FIXME", "HACK", "NOTE"],
+  "todo-tree.highlights.enabled": true
+}
