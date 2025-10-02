@@ -40,6 +40,7 @@ jobs:
           fi
 
   pr_fast:
+    name: PR Fast CI
     if: ${{ github.event_name == 'pull_request' && needs.gate.outputs.should_run == 'true' }}
     needs: gate
     runs-on: ubuntu-latest

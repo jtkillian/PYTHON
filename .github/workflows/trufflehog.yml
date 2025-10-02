@@ -9,6 +9,7 @@ on:
 
 jobs:
   scan-pr:
+    name: TruffleHog PR Scan
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
