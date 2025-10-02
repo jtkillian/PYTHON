@@ -79,7 +79,10 @@ jobs:
       - name: Type check (mypy) on changed files
         if: ${{ steps.changes.outputs.any_changed == 'true' }}
         run: |
-          mypy ${{ steps.changes.outputs.all_changed_files }}
+          PYTHON_FILES=$(echo "${{ steps.changes.outputs.all_changed_files }}" | tr ' ' '\n' | grep '\.py$' || true)
+          if [ -n "$PYTHON_FILES" ]; then
+            mypy $PYTHON_FILES
+          fi
 
       - name: Tests (pytest + testmon; impacted)
         id: tests
