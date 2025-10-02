@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   gate:
-    if: github.event_name == 'pull_request'
+    if: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     outputs:
       should_run: ${{ steps.eval.outputs.should_run }}
@@ -38,8 +38,8 @@ jobs:
             echo "same_repo=false" >> $GITHUB_OUTPUT
           fi
 
-  pr-fast:
-    if: github.event_name == 'pull_request' && needs.gate.outputs.should_run == 'true'
+  pr_fast:
+    if: ${{ github.event_name == 'pull_request' && needs.gate.outputs.should_run == 'true' }}
     needs: gate
     runs-on: ubuntu-latest
     outputs:
@@ -67,7 +67,7 @@ jobs:
           pip install -e .
 
       - name: Lint (ruff) on changed files
-        if: steps.changes.outputs.any_changed == 'true'
+        if: ${{ steps.changes.outputs.any_changed == 'true' }}
         run: |
           ruff check ${{ steps.changes.outputs.all_changed_files }}
 
@@ -75,7 +75,7 @@ jobs:
         run: black --check .
 
       - name: Type check (mypy) on changed files
-        if: steps.changes.outputs.any_changed == 'true'
+        if: ${{ steps.changes.outputs.any_changed == 'true' }}
         run: |
           mypy ${{ steps.changes.outputs.all_changed_files }}
 
@@ -92,9 +92,9 @@ jobs:
             echo "ok=false" >> $GITHUB_OUTPUT
           fi
 
-  ai-autofix:
-    if: needs['pr-fast'].result == 'success' && needs['pr-fast'].outputs.checks_ok == 'false' && needs.gate.outputs.same_repo == 'true'
-    needs: [gate, pr-fast]
+  ai_autofix:
+    if: ${{ needs['pr_fast'].result == 'success' && needs['pr_fast'].outputs.checks_ok == 'false' && needs.gate.outputs.same_repo == 'true' }}
+    needs: [gate, pr_fast]
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.GITHUB_MODELS_TOKEN }}
@@ -170,10 +170,8 @@ EOF
           echo "result=failed" >> $GITHUB_OUTPUT
 
   notify:
-    if: |
-      (needs['pr-fast'].result == 'success' && needs['pr-fast'].outputs.checks_ok == 'true') ||
-      (needs['ai-autofix'].result == 'success' && needs['ai-autofix'].outputs.result == 'clean')
-    needs: [pr-fast, ai-autofix]
+    if: ${{ (needs['pr_fast'].result == 'success' && needs['pr_fast'].outputs.checks_ok == 'true') || (needs['ai_autofix'].result == 'success' && needs['ai_autofix'].outputs.result == 'clean') }}
+    needs: [pr_fast, ai_autofix]
     runs-on: ubuntu-latest
     steps:
       - name: Comment success
@@ -188,8 +186,8 @@ EOF
               body
             })
 
-  push-main-full:
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/main')
+  push_main_full:
+    if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/main') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
