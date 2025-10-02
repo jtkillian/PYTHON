@@ -3,7 +3,7 @@ from __future__ import annotations
 import sys
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Union
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -16,7 +16,10 @@ except Exception:  # SymPy missing or not importable
     sp = None  # type: ignore
     SymExpr = object  # fallback type
 
-SymOrCallable = Union[SymExpr, Callable[[np.ndarray], np.ndarray]]
+if TYPE_CHECKING:
+    import ipywidgets as ipywidgets
+
+SymOrCallable = SymExpr | Callable[[np.ndarray], np.ndarray]
 
 
 # ---------- Ensure "<repo>/src" on sys.path so imports work from any notebook ----------
@@ -119,7 +122,7 @@ def tangent_widget(
     xmax: float = 4.0,
     step: float = 0.05,
     n: int = 400,
-):
+) -> ipywidgets.Widget:
     """
     Interactive tangent visualizer for y = f(x).
     Returns a single VBox (slider + plot) and NEVER calls display() internally.
@@ -222,7 +225,7 @@ def surface3d_widget(
     nn: int = int(grid)
     x = np.linspace(x0, x1, num=nn)
     y = np.linspace(y0, y1, num=nn)
-    X, Y = np.meshgrid(x, y)
+    x_grid, y_grid = np.meshgrid(x, y)
 
     params = params or {}
     current: dict[str, float] = {k: float(v[0]) for k, v in params.items()}
@@ -236,8 +239,8 @@ def surface3d_widget(
         # Confirm FigureWidget availability (requires anywidget)
         _ = go.FigureWidget  # type: ignore[attr-defined]
 
-        Z = func(X, Y, **current)
-        fig = go.FigureWidget(data=[go.Surface(z=Z, x=X, y=Y)])
+        z_grid = func(x_grid, y_grid, **current)
+        fig = go.FigureWidget(data=[go.Surface(z=z_grid, x=x_grid, y=y_grid)])
         fig.update_layout(
             width=720, height=520, margin=dict(l=0, r=0, t=30, b=0), title=_surface_title(current)
         )
@@ -255,12 +258,12 @@ def surface3d_widget(
                 )
             )
 
-        def on_change(_chg: Any) -> None:
+        def on_change(_chg: dict[str, Any]) -> None:
             for s in sliders:
                 current[s.description] = float(s.value)
-            Z2 = func(X, Y, **current)
+            updated_z = func(x_grid, y_grid, **current)
             with fig.batch_update():
-                fig.data[0].z = Z2
+                fig.data[0].z = updated_z
                 fig.update_layout(title=_surface_title(current))
 
         for s in sliders:
@@ -277,8 +280,8 @@ def surface3d_widget(
         if not pio.renderers.default:
             pio.renderers.default = "vscode"
 
-        Z = func(X, Y, **current)
-        fig = go.Figure(data=[go.Surface(z=Z, x=X, y=Y)])
+        z_grid = func(x_grid, y_grid, **current)
+        fig = go.Figure(data=[go.Surface(z=z_grid, x=x_grid, y=y_grid)])
         fig.update_layout(
             width=720,
             height=520,

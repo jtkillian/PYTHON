@@ -1,0 +1,27 @@
+{
+    "configurations": [
+        {
+            "type": "debugpy",
+            "request": "launch",
+            "name": "Python: Run script",
+            "program": "${workspaceFolder}/${input:pythonProgram}",
+            "console": "integratedTerminal"
+        },
+        {
+            "type": "debugpy",
+            "request": "launch",
+            "name": "Python: pytest",
+            "module": "pytest",
+            "args": [
+                "-q"
+            ]
+        }
+    ],
+    "inputs": [
+        {
+            "id": "pythonProgram",
+            "type": "promptString",
+            "description": "Enter path to the Python script relative to the workspace folder"
+        }
+    ]
+}
