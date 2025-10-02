@@ -3,23 +3,25 @@ from __future__ import annotations
 import sys
 from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypeAlias
 
 import numpy as np
 
 # Optional SymPy import (works even if SymPy isn't installed)
 try:
     import sympy as sp  # type: ignore
-
-    SymExpr = sp.Expr
 except Exception:  # SymPy missing or not importable
     sp = None  # type: ignore
-    SymExpr = object  # fallback type
 
 if TYPE_CHECKING:
     import ipywidgets as ipywidgets
+    import sympy as sympy_types  # type: ignore
 
-SymOrCallable = SymExpr | Callable[[np.ndarray], np.ndarray]
+    SymExprType = sympy_types.Expr
+else:
+    SymExprType = object  # fallback type
+
+SymOrCallable: TypeAlias = SymExprType | Callable[[np.ndarray], np.ndarray]
 
 
 # ---------- Ensure "<repo>/src" on sys.path so imports work from any notebook ----------
@@ -96,22 +98,22 @@ def _coerce_univariate(sym_or_callable: SymOrCallable) -> tuple[
         f_expr = sym_or_callable  # type: ignore[assignment]
         fprime_expr = sp.diff(f_expr, sym_x)  # type: ignore[misc]
 
-        f = sp.lambdify(sym_x, f_expr, modules="numpy")  # type: ignore[misc]
-        fprime = sp.lambdify(sym_x, fprime_expr, modules="numpy")  # type: ignore[misc]
-        return f, fprime
+    f_sym = sp.lambdify(sym_x, f_expr, modules="numpy")  # type: ignore[misc]
+    fprime_sym = sp.lambdify(sym_x, fprime_expr, modules="numpy")  # type: ignore[misc]
+    return f_sym, fprime_sym
 
     if not callable(sym_or_callable):
         raise TypeError("Expected a SymPy expression or a Python callable f(x).")
 
-    def f(x: np.ndarray) -> np.ndarray:
+    def f_callable(x: np.ndarray) -> np.ndarray:
         return np.asarray(sym_or_callable(x), dtype=float)  # type: ignore[misc]
 
-    def fprime(x: np.ndarray) -> np.ndarray:
+    def fprime_callable(x: np.ndarray) -> np.ndarray:
         # central difference with adaptive step
         h = 1e-5 * (1.0 + np.abs(x))
-        return (f(x + h) - f(x - h)) / (2.0 * h)
+        return (f_callable(x + h) - f_callable(x - h)) / (2.0 * h)
 
-    return f, fprime
+    return f_callable, fprime_callable
 
 
 # ---------- Tangent line widget (single output, smooth updates) ----------
