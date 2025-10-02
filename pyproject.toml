@@ -1,8 +1,18 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "python-sandbox"
 version = "0.1.0"
 description = "Public mono-repo for notebooks (tutoring), reusable Python modules, tests, and docs."
 requires-python = ">=3.10"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"
 
 [tool.black]
 line-length = 100
@@ -11,11 +21,10 @@ target-version = ["py310"]
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+select = ["E","F","I","UP","B","SIM","W","C90","N","ANN"]
+ignore = ["ANN101","ANN102"]
 fix = true
 unsafe-fixes = true
-
-[tool.ruff.lint]
-select = ["E","F","I","UP","B","SIM","W","C90","N","ANN"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -24,8 +33,9 @@ quote-style = "double"
 profile = "black"
 
 [tool.pytest.ini_options]
-addopts = "-q --testmon"
+addopts = "-q --testmon --testmon-no-blacklist"
 testpaths = ["tests"]
+pythonpath = ["src"]
 
 [tool.mypy]
 python_version = "3.10"
