@@ -1,48 +1,118 @@
 {
-  "python.defaultInterpreterPath": "${env:USERPROFILE}\\miniconda3\\envs\\py310\\python.exe",
-  "python.analysis.typeCheckingMode": "basic",
-  "python.languageServer": "Pylance",
-  "python.terminal.activateEnvironment": true,
+    "python.defaultInterpreterPath": "${env:USERPROFILE}\\miniconda3\\envs\\py310\\python.exe",
+    "python.analysis.typeCheckingMode": "basic",
+    "python.languageServer": "Pylance",
+    "python.terminal.activateEnvironment": true,
 
-  "editor.fontFamily": "Fira Code Retina",
-  "editor.fontLigatures": true,
-  "editor.fontSize": 12,
-  "editor.formatOnSave": true,
-  "editor.defaultFormatter": "ms-python.black-formatter",
-  "editor.guides.bracketPairs": "active",
-
-  "black-formatter.interpreter": [
-    "${env:USERPROFILE}\\miniconda3\\envs\\py310\\python.exe"
-  ],
-  "black-formatter.importStrategy": "fromEnvironment",
-
-  // --- Terminal setup: always launch into conda py310 ---
-  "terminal.integrated.inheritEnv": true,
-  "terminal.integrated.profiles.windows": {
-    "Conda (py310)": {
-      "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
-      "args": ["-NoExit", "-Command", "conda activate py310"]
-    }
-  },
-  "terminal.integrated.defaultProfile.windows": "Conda (py310)",
-
-  "[python]": {
+    "editor.fontFamily": "Fira Code Retina",
+    "editor.fontLigatures": true,
+    "editor.fontSize": 12,
+    "editor.formatOnSave": true,
     "editor.defaultFormatter": "ms-python.black-formatter",
-    "editor.formatOnSave": true
-  },
-  "[markdown]": { "editor.defaultFormatter": "yzhang.markdown-all-in-one" },
-  "[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-  "[jsonc]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+    "editor.guides.bracketPairs": "active",
 
-  "python.testing.pytestEnabled": true,
-  "python.testing.pytestArgs": ["tests"],
+    "black-formatter.interpreter": [
+        "${env:USERPROFILE}\\miniconda3\\envs\\py310\\python.exe"
+    ],
+    "black-formatter.importStrategy": "fromEnvironment",
 
-  "editor.codeActionsOnSave": {
-    "source.organizeImports.ruff": "explicit",
-    "source.fixAll.ruff": "explicit"
-  },
+    "terminal.integrated.inheritEnv": true,
+    "terminal.integrated.profiles.windows": {
+        "Conda (py310)": {
+            "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "args": [
+                "-NoExit",
+                "-Command",
+                "conda activate py310"
+            ]
+        }
+    },
+    "terminal.integrated.defaultProfile.windows": "Conda (py310)",
 
-  "cSpell.enabled": true,
-  "todo-tree.general.tags": ["TODO", "FIXME", "HACK", "NOTE"],
-  "todo-tree.highlights.enabled": true
+    "python.testing.pytestEnabled": true,
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+
+    "editor.codeActionsOnSave": {
+        "source.organizeImports.ruff": "explicit",
+        "source.fixAll.ruff": "explicit"
+    },
+
+    "cSpell.enabled": true,
+    "todo-tree.general.tags": [
+        "TODO",
+        "FIXME",
+        "HACK",
+        "NOTE"
+    ],
+    "todo-tree.highlights.enabled": true,
+
+    "latex-workshop.latex.autoBuild.run": "onSave",
+    "latex-workshop.view.pdf.viewer": "tab",
+    "latex-workshop.view.pdf.trim": 0,
+    "latex-workshop.synctex.afterBuild.enabled": true,
+    "latex-workshop.view.pdf.internal.synctex.keybinding": "double-click",
+    "latex-workshop.latex.outDir": "build",
+    "latex-workshop.latex.clean.fileTypes": [
+        "*.aux",
+        "*.bbl",
+        "*.bcf",
+        "*.blg",
+        "*.fdb_latexmk",
+        "*.fls",
+        "*.lof",
+        "*.log",
+        "*.lot",
+        "*.out",
+        "*.run.xml",
+        "*.toc",
+        "*.synctex.gz"
+    ],
+    "latex-workshop.latex.tools": [
+        {
+            "name": "latexmk",
+            "command": "latexmk",
+            "args": [
+                "-pdf",
+                "-interaction=nonstopmode",
+                "-synctex=1",
+                "-outdir=build",
+                "%DOC%"
+            ]
+        },
+        {
+            "name": "tectonic",
+            "command": "C:\\Users\\jkill\\tectonic.exe",
+            "args": [
+                "-X",
+                "compile",
+                "%DOC%",
+                "--outdir",
+                "build",
+                "--synctex"
+            ]
+        }
+    ],
+    "latex-workshop.latex.recipes": [
+        {
+            "name": "latexmk (pdf)",
+            "tools": [
+                "latexmk"
+            ]
+        },
+        {
+            "name": "tectonic",
+            "tools": [
+                "tectonic"
+            ]
+        }
+    ],
+    "latex-workshop.latex.recipe.default": "lastUsed",
+    "workbench.editor.openSideBySideDirection": "right",
+
+    "jupyter.widgetScriptSources": [
+        "jsdelivr.com",
+        "unpkg.com"
+    ]
 }
