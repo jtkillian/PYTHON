@@ -21,7 +21,7 @@ jobs:
           since_last_remote_commit: true
       - name: Run TruffleHog (changed files only)
         if: steps.changes.outputs.any_changed == 'true'
-        uses: trufflesecurity/trufflehog@v3
+        uses: trufflesecurity/trufflehog@main
         with:
           path: .
           extra_args: "--only-verified"
@@ -31,7 +31,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
-      - uses: trufflesecurity/trufflehog@v3
+      - uses: trufflesecurity/trufflehog@main
         with:
           path: .
           extra_args: "--only-verified"
