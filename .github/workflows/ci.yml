@@ -93,7 +93,7 @@ jobs:
           fi
 
   ai-autofix:
-    if: needs.pr-fast.result == 'success' && needs.pr-fast.outputs.checks_ok == 'false' && needs.gate.outputs.same_repo == 'true'
+    if: needs['pr-fast'].result == 'success' && needs['pr-fast'].outputs.checks_ok == 'false' && needs.gate.outputs.same_repo == 'true'
     needs: [gate, pr-fast]
     runs-on: ubuntu-latest
     env:
@@ -171,8 +171,8 @@ EOF
 
   notify:
     if: |
-      (needs.pr-fast.result == 'success' && needs.pr-fast.outputs.checks_ok == 'true') ||
-      (needs.ai-autofix.result == 'success' && needs.ai-autofix.outputs.result == 'clean')
+      (needs['pr-fast'].result == 'success' && needs['pr-fast'].outputs.checks_ok == 'true') ||
+      (needs['ai-autofix'].result == 'success' && needs['ai-autofix'].outputs.result == 'clean')
     needs: [pr-fast, ai-autofix]
     runs-on: ubuntu-latest
     steps:
