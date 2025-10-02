@@ -101,6 +101,8 @@ jobs:
     if: ${{ needs['pr_fast'].result == 'success' && needs['pr_fast'].outputs.checks_ok == 'false' && needs.gate.outputs.same_repo == 'true' }}
     needs: [gate, pr_fast]
     runs-on: ubuntu-latest
+    outputs:
+      result: ${{ steps.loop.outputs.result }}
     env:
       GH_TOKEN: ${{ secrets.GH_MODELS_TOKEN }}
       OWNER: ${{ github.repository_owner }}
@@ -171,7 +173,7 @@ jobs:
           echo "result=failed" >> $GITHUB_OUTPUT
 
   notify:
-    if: ${{ (needs['pr_fast'].result == 'success' && needs['pr_fast'].outputs.checks_ok == 'true') || (needs['ai_autofix'].result == 'success' && needs['ai_autofix'].outputs.result == 'clean') }}
+    if: ${{ (needs['pr_fast'].outputs.checks_ok == 'true') || (needs['ai_autofix'].outputs.result == 'clean') }}
     needs: [pr_fast, ai_autofix]
     runs-on: ubuntu-latest
     steps:
