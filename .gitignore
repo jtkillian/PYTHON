@@ -1,14 +1,19 @@
+# Python bytecode / env / build
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 *.egg-info/
-dist/
-build/
 .venv/
 .env
 .env.*
+dist/
+build/
+
+# Jupyter
 .ipynb_checkpoints/
+
+# OS
 .DS_Store
 Thumbs.db
 
@@ -20,11 +25,12 @@ data/**/*
 .vscode/*
 !.vscode/settings.json
 !.vscode/launch.json
+!.vscode/tasks.json
 
 # Node (if used)
 node_modules/
 
-# MATLAB (bridging)
+# MATLAB
 slprj/
 codegen/
 *.asv
@@ -39,4 +45,11 @@ code-coverage/
 ci/
 .testmondata
 
+# MCP memory
 .mcp/memory.json
+
+# LaTeX builds (docs/)
+docs/build/**
+
+# Quarto builds (quarto/)
+quarto/build/**

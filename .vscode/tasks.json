@@ -1,0 +1,56 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Quarto: Render current notebook (HTML, PDF, DOCX)",
+            "type": "shell",
+            "problemMatcher": [ ],
+            "options": { "cwd": "${workspaceFolder}" },
+            "command": [
+                "powershell",
+                "-NoProfile",
+                "-ExecutionPolicy", "Bypass",
+                "-Command",
+                "$root = (Resolve-Path '${workspaceFolder}').Path;",
+                "$src  = '${file}';",
+                "$name = '${fileBasenameNoExtension}';",
+                "$nbroot = Join-Path $root 'notebooks';",
+                "$srcDir = Split-Path $src -Parent;",
+                "$relDir = $srcDir.Substring($nbroot.Length).TrimStart('\\','/');",
+                "$outDir = Join-Path (Join-Path $root 'quarto\\build') $relDir;",
+                "New-Item -ItemType Directory -Force -Path $outDir | Out-Null;",
+                "$baseOut = Join-Path $outDir $name;",
+                "quarto render \"$src\" --to html     --output \"$($baseOut).html\";",
+                "quarto render \"$src\" --to pdf      --output \"$($baseOut).pdf\";",
+                "quarto render \"$src\" --to docx     --output \"$($baseOut).docx\";",
+                "quarto render \"$src\" --to revealjs --output \"$($baseOut).slides.html\";"
+            ],
+            "presentation": { "reveal": "always", "panel": "dedicated" },
+            "runOptions": { "reevaluateOnRerun": true }
+        },
+        {
+            "label": "Run: JupyterLab",
+            "type": "shell",
+            "command": "python -m jupyter lab",
+            "problemMatcher": [ ]
+        },
+        {
+            "label": "Run: Streamlit Demo",
+            "type": "shell",
+            "command": "streamlit hello",
+            "problemMatcher": [ ]
+        },
+        {
+            "label": "Run: Panel Demo",
+            "type": "shell",
+            "command": "panel serve apps/panel/demo_quick.py --show --autoreload",
+            "problemMatcher": [ ]
+        },
+        {
+            "label": "EDA: ydata-profiling (report.html)",
+            "type": "shell",
+            "command": "python -c \"import pandas as pd; from ydata_profiling import ProfileReport as P; df=pd.read_csv('data/example.csv'); P(df, title='Profile').to_file('report.html'); print('Wrote report.html')\"",
+            "problemMatcher": [ ]
+        }
+    ]
+}

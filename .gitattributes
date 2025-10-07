@@ -1,5 +1,17 @@
+# Normalize text
 * text=auto eol=lf
+
+# Notebooks as text (improves diffs)
 *.ipynb text
-*.m text linguist-language=MATLAB
+
+# MATLAB hints
+*.m   text linguist-language=MATLAB
 *.mat binary
 *.mex* binary
+
+# Track PDFs with Git LFS (Quarto & LaTeX outputs)
+*.pdf filter=lfs diff=lfs merge=lfs -text
+
+# Keep CI artifact merges simple
+test-results/* merge=ours
+code-coverage/* merge=ours

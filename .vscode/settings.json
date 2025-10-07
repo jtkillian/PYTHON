@@ -1,7 +1,7 @@
 {
-    "python.defaultInterpreterPath": "${env:USERPROFILE}\\miniconda3\\envs\\py310\\python.exe",
-    "python.analysis.typeCheckingMode": "basic",
+    "python.defaultInterpreterPath": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
     "python.languageServer": "Pylance",
+    "python.analysis.typeCheckingMode": "basic",
     "python.terminal.activateEnvironment": true,
 
     "editor.fontFamily": "Fira Code Retina",
@@ -11,28 +11,34 @@
     "editor.defaultFormatter": "ms-python.black-formatter",
     "editor.guides.bracketPairs": "active",
 
-    "black-formatter.interpreter": [
-        "${env:USERPROFILE}\\miniconda3\\envs\\py310\\python.exe"
-    ],
     "black-formatter.importStrategy": "fromEnvironment",
+    "black-formatter.interpreter": [
+        "${workspaceFolder}\\.venv\\Scripts\\python.exe"
+    ],
 
+    "terminal.integrated.cwd": "${workspaceFolder}",
     "terminal.integrated.inheritEnv": true,
+
     "terminal.integrated.profiles.windows": {
-        "Conda (py310)": {
+        "Workspace venv (PYTHON)": {
             "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
             "args": [
                 "-NoExit",
                 "-Command",
-                "conda activate py310"
-            ]
+                "& \"${workspaceFolder}\\.venv\\Scripts\\Activate.ps1\""
+            ],
+            "icon": "terminal-powershell"
         }
     },
-    "terminal.integrated.defaultProfile.windows": "Conda (py310)",
+    "terminal.integrated.defaultProfile.windows": "Workspace venv (PYTHON)",
+
+    "terminal.integrated.env.windows": {
+        "VIRTUAL_ENV": "${workspaceFolder}\\.venv",
+        "PATH": "${workspaceFolder}\\.venv\\Scripts;${env:PATH}"
+    },
 
     "python.testing.pytestEnabled": true,
-    "python.testing.pytestArgs": [
-        "tests"
-    ],
+    "python.testing.pytestArgs": [ "tests" ],
 
     "editor.codeActionsOnSave": {
         "source.organizeImports.ruff": "explicit",
@@ -40,12 +46,7 @@
     },
 
     "cSpell.enabled": true,
-    "todo-tree.general.tags": [
-        "TODO",
-        "FIXME",
-        "HACK",
-        "NOTE"
-    ],
+    "todo-tree.general.tags": [ "TODO", "FIXME", "HACK", "NOTE" ],
     "todo-tree.highlights.enabled": true,
 
     "latex-workshop.latex.autoBuild.run": "onSave",
@@ -53,7 +54,7 @@
     "latex-workshop.view.pdf.trim": 0,
     "latex-workshop.synctex.afterBuild.enabled": true,
     "latex-workshop.view.pdf.internal.synctex.keybinding": "double-click",
-    "latex-workshop.latex.outDir": "build",
+    "latex-workshop.latex.outDir": "build/%DOCFILE%",
     "latex-workshop.latex.clean.fileTypes": [
         "*.aux",
         "*.bbl",
@@ -77,7 +78,7 @@
                 "-pdf",
                 "-interaction=nonstopmode",
                 "-synctex=1",
-                "-outdir=build",
+                "-outdir=build/%DOCFILE%",
                 "%DOC%"
             ]
         },
@@ -89,30 +90,27 @@
                 "compile",
                 "%DOC%",
                 "--outdir",
-                "build",
+                "build/%DOCFILE%",
                 "--synctex"
             ]
         }
     ],
     "latex-workshop.latex.recipes": [
-        {
-            "name": "latexmk (pdf)",
-            "tools": [
-                "latexmk"
-            ]
-        },
-        {
-            "name": "tectonic",
-            "tools": [
-                "tectonic"
-            ]
-        }
+        { "name": "latexmk (pdf)", "tools": [ "latexmk" ] },
+        { "name": "tectonic", "tools": [ "tectonic" ] }
     ],
     "latex-workshop.latex.recipe.default": "lastUsed",
-    "workbench.editor.openSideBySideDirection": "right",
 
-    "jupyter.widgetScriptSources": [
-        "jsdelivr.com",
-        "unpkg.com"
-    ]
+    "emeraldwalk.runonsave": {
+        "commands": [
+            {
+                "match": "notebooks/.*\\.ipynb$",
+                "isAsync": true,
+                "cmd": "code --command workbench.action.tasks.runTask -- 'Quarto: Render current notebook (HTML, PDF, DOCX)'"
+            }
+        ]
+    },
+
+    "jupyter.widgetScriptSources": [ "jsdelivr.com", "unpkg.com" ],
+    "workbench.editor.openSideBySideDirection": "right"
 }
