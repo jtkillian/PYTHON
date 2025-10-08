@@ -8,12 +8,12 @@ from typing import Tuple
 import numpy as np
 try:  # pragma: no cover - optional dependency
     import soundfile as sf
-except Exception:  # pragma: no cover - fallback when soundfile missing
+except ImportError:  # pragma: no cover - fallback when soundfile missing
     sf = None  # type: ignore
 
 try:  # pragma: no cover - optional dependency
     import librosa
-except Exception:  # pragma: no cover - fallback when librosa missing
+except ImportError:  # pragma: no cover - fallback when librosa missing
     librosa = None  # type: ignore
 
 from .config import EchoConfig
