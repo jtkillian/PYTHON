@@ -8,14 +8,13 @@ Install the GPU-first stack (falls back to CPU automatically):
 uv pip install --extra-index-url https://download.pytorch.org/whl/cu124 torch torchaudio numpy scipy librosa soundfile matplotlib imageio imageio-ffmpeg tqdm rich typer cupy-cuda12x nvidia-cuda-runtime-cu12 nvidia-cublas-cu12 nvidia-cudnn-cu12 sounddevice
 ```
 
-Copy or record WAV files into `assets/wav/`. Run `python scripts/generate_sample_wav.py` to materialise the bundled `sine.wav`
-tone for quick testing.
+Copy or record WAV files into `assets/wav/` (e.g. `assets/wav/example.wav`).
 
 ## Launching the app
 
 | Command | Purpose |
 | --- | --- |
-| `python spectro3d.py demo assets/wav/sine.wav --mp4 dist/videos/sine.mp4 --fps 30` | Precompute, open the UI, and export an MP4 during the session. |
+| `python spectro3d.py demo assets/wav/example.wav --mp4 dist/videos/example.mp4 --fps 30` | Precompute, open the UI, and export an MP4 during the session. |
 | `python spectro3d.py view assets/wav/song.wav` | Precompute (cache) then open the interactive viewer. |
 | `python spectro3d.py render-mp4 assets/wav/song.wav --out dist/videos/song.mp4 --fps 60` | Render a video only (no window). |
 | `python spectro3d.py play assets/wav/song.wav` | Start playback with the 4-pane UI. |

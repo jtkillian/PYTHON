@@ -10,12 +10,12 @@ Echo is a GPU-friendly interactive 3D spectrogram viewer and renderer. It preren
    uv pip install --extra-index-url https://download.pytorch.org/whl/cu124 torch torchaudio numpy scipy librosa soundfile matplotlib imageio imageio-ffmpeg tqdm rich typer cupy-cuda12x nvidia-cuda-runtime-cu12 nvidia-cublas-cu12 nvidia-cudnn-cu12 sounddevice
    ```
 
-2. Drop WAV files in `assets/wav/`. To regenerate the bundled sine tone, run `python scripts/generate_sample_wav.py` (creates `assets/wav/sine.wav`).
+2. Drop WAV files in `assets/wav/` (for example `assets/wav/example.wav`).
 
 3. Run one of the CLI commands below from this directory:
 
    ```bash
-   python spectro3d.py demo assets/wav/sine.wav --mp4 dist/videos/sine.mp4 --fps 30
+   python spectro3d.py demo assets/wav/example.wav --mp4 dist/videos/example.mp4 --fps 30
    python spectro3d.py view assets/wav/song.wav
    python spectro3d.py render-mp4 assets/wav/song.wav --out dist/videos/song.mp4 --fps 60
    ```
