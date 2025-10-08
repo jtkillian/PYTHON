@@ -53,3 +53,9 @@ docs/build/**
 
 # Quarto builds (quarto/)
 quarto/build/**
+
+# Audio files
+*.wav
+
+# Video files
+*.mp4
