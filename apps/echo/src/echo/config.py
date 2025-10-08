@@ -30,6 +30,8 @@ class EchoConfig:
     hifi_subsample: tuple[int, int] = (1, 1)
     gate_width_s: float = 10.0
     gate_rate: float = 1.0
+    max_gate_columns: int = 512
+    max_gate_rows: int = 256
 
     # Paths
     cache_dir: str = "dist/caches"
@@ -37,6 +39,7 @@ class EchoConfig:
     # UI
     fine_step: float = 1.0
     fine_step_alt: float = 0.5
+    waveform_max_points: int = 20000
 
     # Playback
     enable_playback: bool = True
