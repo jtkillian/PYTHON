@@ -388,5 +388,5 @@ async def scan(payload: ScanRequest) -> ScanResponse:
 
 
 @app.get("/health")
-async def health() -> Dict[str, str]:
-    return {"status": "ok", "face_model": str(FACE_MODEL.exists()).lower()}
+async def health() -> Dict[str, object]:
+    return {"status": "ok", "face_model": FACE_MODEL.exists()}
