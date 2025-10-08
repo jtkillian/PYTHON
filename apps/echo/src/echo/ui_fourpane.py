@@ -28,6 +28,7 @@ class UIState:
     freqs: np.ndarray
     db: np.ndarray
     waveform: np.ndarray
+    wave_times: np.ndarray
     sr: int
     duration: float
 
@@ -129,12 +130,7 @@ class FourPaneUI:
         self.ax_spec.set_ylabel("Freq [Hz]")
         self.figure.colorbar(self.spec_img, ax=self.ax_spec, shrink=0.8, pad=0.02)
 
-        wave_time = np.linspace(
-            0,
-            self.state.waveform.shape[-1] / self.state.sr,
-            self.state.waveform.shape[-1],
-        )
-        (self.wave_line,) = self.ax_wave.plot(wave_time, self.state.waveform, color="#3fa7d6")
+        (self.wave_line,) = self.ax_wave.plot(self.state.wave_times, self.state.waveform, color="#3fa7d6")
         self.ax_wave.set_xlabel("Time [s]")
         self.ax_wave.set_ylabel("Amplitude")
 
@@ -215,9 +211,10 @@ class FourPaneUI:
     def set_time(self, value: float) -> None:
         duration = self.state.duration
         self.current_time = max(0.0, min(float(value), duration))
-        self.slider.eventson = False
-        self.slider.set_val(self.current_time)
-        self.slider.eventson = True
+        if not self.headless:
+            self.slider.eventson = False
+            self.slider.set_val(self.current_time)
+            self.slider.eventson = True
         self.update_all()
 
     def adjust_gate(self, delta: float) -> None:
@@ -242,7 +239,8 @@ class FourPaneUI:
         self.update_slice()
         self.update_3d()
         self.update_hud()
-        self.figure.canvas.draw_idle()
+        if not self.headless:
+            self.figure.canvas.draw_idle()
 
     def update_cursors(self) -> None:
         self.spec_cursor.set_xdata([self.current_time, self.current_time])
@@ -288,6 +286,20 @@ class FourPaneUI:
         gate_times = gate_times[::sub_t]
         gate_db = gate_db[::sub_f, ::sub_t]
         gate_freqs = freqs[::sub_f]
+
+        max_cols = max(1, getattr(self.config, "max_gate_columns", 512))
+        max_rows = max(1, getattr(self.config, "max_gate_rows", 256))
+        if gate_times.size > max_cols:
+            stride = int(np.ceil(gate_times.size / max_cols))
+            gate_times = gate_times[::stride]
+            gate_db = gate_db[:, ::stride]
+        if gate_freqs.size > max_rows:
+            stride = int(np.ceil(gate_freqs.size / max_rows))
+            gate_freqs = gate_freqs[::stride]
+            gate_db = gate_db[::stride, :]
+
+        if gate_times.size == 0 or gate_freqs.size == 0:
+            return
 
         time_grid, freq_grid = np.meshgrid(gate_times, gate_freqs, copy=False)
         if self._surface is not None:

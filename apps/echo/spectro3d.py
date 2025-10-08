@@ -19,7 +19,7 @@ from echo.cache import cache_paths, load_cache, save_cache  # noqa: E402
 from echo.mp4 import render_mp4  # noqa: E402
 from echo.playback import AudioPlayback, PlaybackState  # noqa: E402
 from echo.ui_fourpane import FourPaneUI, UIState  # noqa: E402
-from echo.utils import device_summary, log_info  # noqa: E402
+from echo.utils import device_summary, downsample_waveform, log_info  # noqa: E402
 
 
 app = typer.Typer(add_completion=False)
@@ -55,7 +55,20 @@ def prepare_state(path: Path, config: EchoConfig) -> tuple[UIState, np.ndarray, 
     duration = max(times[-1], audio.shape[-1] / sr) if times.size else audio.shape[-1] / sr
     waveform = audio if audio.ndim == 1 else audio[0]
     waveform = np.asarray(waveform, dtype=np.float32)
-    state = UIState(times=times, freqs=freqs, db=db, waveform=waveform, sr=sr, duration=float(duration))
+    display_wave, wave_times = downsample_waveform(
+        waveform,
+        samplerate=sr,
+        max_points=config.waveform_max_points,
+    )
+    state = UIState(
+        times=times,
+        freqs=freqs,
+        db=db,
+        waveform=display_wave,
+        wave_times=wave_times,
+        sr=sr,
+        duration=float(duration),
+    )
     return state, audio, sr
 
 
