@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Dict, Iterable
 
 import numpy as np
+
 
 try:  # pragma: no cover - optional dependency
     import torch
@@ -47,7 +48,7 @@ def device_summary() -> str:
     return "CPU"
 
 
-def hash_config(file_path: Path, config_data: Dict[str, object]) -> str:
+def hash_config(file_path: Path, config_data: dict[str, object]) -> str:
     """Create a deterministic hash for cache keys."""
 
     stat = file_path.stat()

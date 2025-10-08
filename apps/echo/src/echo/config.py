@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Dict, Tuple
 
 
 @dataclass
@@ -27,8 +26,8 @@ class EchoConfig:
     db_ceiling: float = 0.0
 
     # 3D rendering parameters
-    interactive_subsample: Tuple[int, int] = (2, 2)
-    hifi_subsample: Tuple[int, int] = (1, 1)
+    interactive_subsample: tuple[int, int] = (2, 2)
+    hifi_subsample: tuple[int, int] = (1, 1)
     gate_width_s: float = 10.0
     gate_rate: float = 1.0
 
@@ -42,9 +41,9 @@ class EchoConfig:
     # Playback
     enable_playback: bool = True
 
-    extra: Dict[str, str] = field(default_factory=dict)
+    extra: dict[str, str] = field(default_factory=dict)
 
-    def as_dict(self) -> Dict[str, object]:
+    def as_dict(self) -> dict[str, object]:
         """Return a shallow dictionary suitable for hashing or serialization."""
 
         data = asdict(self)
@@ -60,7 +59,7 @@ class EchoConfig:
         cache_path.mkdir(parents=True, exist_ok=True)
         return cache_path
 
-    def update_from_cli(self, overrides: Dict[str, object]) -> None:
+    def update_from_cli(self, overrides: dict[str, object]) -> None:
         """Apply CLI overrides to the configuration in place."""
 
         for key, value in overrides.items():

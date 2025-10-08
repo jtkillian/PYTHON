@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict
 
 import numpy as np
+
 
 try:  # pragma: no cover - optional dependency
     import torch
@@ -21,7 +21,7 @@ from .config import EchoConfig
 from .utils import db_clip, ensure_numpy, log_info
 
 
-class SpectrogramResult(Dict[str, np.ndarray]):
+class SpectrogramResult(dict[str, np.ndarray]):
     """Dictionary subclass storing spectrogram data."""
 
 

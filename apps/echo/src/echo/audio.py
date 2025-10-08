@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Tuple
 
 import numpy as np
+
+
 try:  # pragma: no cover - optional dependency
     import soundfile as sf
 except ImportError:  # pragma: no cover - fallback when soundfile missing
@@ -19,7 +20,7 @@ except ImportError:  # pragma: no cover - fallback when librosa missing
 from .config import EchoConfig
 
 
-def load_audio(path: Path, config: EchoConfig) -> Tuple[np.ndarray, int]:
+def load_audio(path: Path, config: EchoConfig) -> tuple[np.ndarray, int]:
     """Load audio from *path* using the supplied configuration.
 
     Parameters
@@ -49,8 +50,5 @@ def load_audio(path: Path, config: EchoConfig) -> Tuple[np.ndarray, int]:
     data, sr = sf.read(path, always_2d=True)
     if target_sr is not None and target_sr != sr:
         raise RuntimeError("Resampling requires librosa; install it to change --sr")
-    if mono:
-        data = data.mean(axis=1)
-    else:
-        data = data.T
+    data = data.mean(axis=1) if mono else data.T
     return data.astype(np.float32), int(sr)

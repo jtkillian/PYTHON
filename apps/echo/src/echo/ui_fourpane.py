@@ -2,13 +2,19 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Optional
+from typing import TYPE_CHECKING, cast
 
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.widgets import Slider
+
+
+if TYPE_CHECKING:
+    from matplotlib.backend_bases import CloseEvent, KeyEvent, MouseEvent
+    from mpl_toolkits.mplot3d import Axes3D
 
 from .colormap import DEFAULT_COLORMAP
 from .config import EchoConfig
@@ -26,6 +32,17 @@ class UIState:
     duration: float
 
 
+def _time_window_slice(times: np.ndarray, start: float, end: float) -> slice:
+    if times.size == 0:
+        return slice(0, 0)
+    left = int(np.searchsorted(times, start, side="left"))
+    right = int(np.searchsorted(times, end, side="right"))
+    if left == right:
+        left = max(0, min(left, times.size - 1))
+        right = min(times.size, left + 1)
+    return slice(left, right)
+
+
 class FourPaneUI:
     """Encapsulates the Matplotlib figure and interactions."""
 
@@ -33,7 +50,7 @@ class FourPaneUI:
         self,
         state: UIState,
         config: EchoConfig,
-        playback: Optional[AudioPlayback] = None,
+        playback: AudioPlayback | None = None,
         headless: bool = False,
     ) -> None:
         self.state = state
@@ -55,7 +72,7 @@ class FourPaneUI:
             manager.set_window_title("Echo — 3D Spectrogram")
         gs = GridSpec(2, 2, figure=self.figure)
 
-        self.ax3d = self.figure.add_subplot(gs[0, 0], projection="3d")
+        self.ax3d = cast("Axes3D", self.figure.add_subplot(gs[0, 0], projection="3d"))
         self.ax_spec = self.figure.add_subplot(gs[0, 1])
         self.ax_wave = self.figure.add_subplot(gs[1, 0])
         self.ax_slice = self.figure.add_subplot(gs[1, 1])
@@ -112,12 +129,16 @@ class FourPaneUI:
         self.ax_spec.set_ylabel("Freq [Hz]")
         self.figure.colorbar(self.spec_img, ax=self.ax_spec, shrink=0.8, pad=0.02)
 
-        wave_time = np.linspace(0, self.state.waveform.shape[-1] / self.state.sr, self.state.waveform.shape[-1])
-        self.wave_line, = self.ax_wave.plot(wave_time, self.state.waveform, color="#3fa7d6")
+        wave_time = np.linspace(
+            0,
+            self.state.waveform.shape[-1] / self.state.sr,
+            self.state.waveform.shape[-1],
+        )
+        (self.wave_line,) = self.ax_wave.plot(wave_time, self.state.waveform, color="#3fa7d6")
         self.ax_wave.set_xlabel("Time [s]")
         self.ax_wave.set_ylabel("Amplitude")
 
-        self.slice_line, = self.ax_slice.plot(freqs, db[:, 0], color="#ffcc00")
+        (self.slice_line,) = self.ax_slice.plot(freqs, db[:, 0], color="#ffcc00")
         self.ax_slice.set_xlabel("Freq [Hz]")
         self.ax_slice.set_ylabel("Level [dB]")
 
@@ -146,7 +167,7 @@ class FourPaneUI:
         if self.playback.state.playing:
             self.set_time(pos)
 
-    def _on_close(self, event) -> None:  # pragma: no cover - GUI callback
+    def _on_close(self, event: CloseEvent) -> None:  # pragma: no cover - GUI callback
         if self.playback is not None:
             self.playback.shutdown()
         if hasattr(self, "_timer") and self._timer is not None:
@@ -155,7 +176,7 @@ class FourPaneUI:
     def _on_slider(self, value: float) -> None:
         self.set_time(float(value))
 
-    def _on_click(self, event) -> None:  # pragma: no cover - GUI callback
+    def _on_click(self, event: MouseEvent) -> None:  # pragma: no cover - GUI callback
         if event.inaxes in (self.ax_spec, self.ax_wave) and event.xdata is not None:
             self.set_time(float(event.xdata))
             if self.playback is not None:
@@ -163,30 +184,27 @@ class FourPaneUI:
         elif self.fine_label.contains(event)[0]:
             self.toggle_fine_step()
 
-    def _on_key(self, event) -> None:  # pragma: no cover - GUI callback
-        key = event.key
-        if key == "left":
-            self.seek_relative(-5.0)
-        elif key == "right":
-            self.seek_relative(5.0)
-        elif key == ",":
-            self.seek_relative(-self.fine_step)
-        elif key == ".":
-            self.seek_relative(self.fine_step)
-        elif key == "[":
-            self.adjust_gate(-1.0)
-        elif key == "]":
-            self.adjust_gate(1.0)
-        elif key == "q":
-            self.adjust_rate(-0.25)
-        elif key == "e":
-            self.adjust_rate(0.25)
-        elif key == "p":
-            self.toggle_fidelity()
-        elif key == " ":
-            if self.playback is not None:
-                self.playback.toggle()
-        self.update_all()
+    def _on_key(self, event: KeyEvent) -> None:  # pragma: no cover - GUI callback
+        key = event.key or ""
+        actions: dict[str, Callable[[], None]] = {
+            "left": lambda: self.seek_relative(-5.0),
+            "right": lambda: self.seek_relative(5.0),
+            ",": lambda: self.seek_relative(-self.fine_step),
+            ".": lambda: self.seek_relative(self.fine_step),
+            "[": lambda: self.adjust_gate(-1.0),
+            "]": lambda: self.adjust_gate(1.0),
+            "q": lambda: self.adjust_rate(-0.25),
+            "e": lambda: self.adjust_rate(0.25),
+            "p": self.toggle_fidelity,
+        }
+        action = actions.get(key)
+        if action is not None:
+            action()
+            self.update_all()
+            return
+        if key == " " and self.playback is not None:
+            self.playback.toggle()
+            self.update_all()
 
     # ------------------------------------------------------------------
     def seek_relative(self, delta: float) -> None:
@@ -240,6 +258,9 @@ class FourPaneUI:
         freqs = self.state.freqs
         db = self.state.db
 
+        if times.size == 0 or freqs.size == 0:
+            return
+
         if not hasattr(self, "_surface"):
             self._surface = None
 
@@ -247,25 +268,31 @@ class FourPaneUI:
         self.gate_center += (self.current_time - self.gate_center) * follow
 
         half = self.gate_width / 2.0
-        start = max(times[0], self.gate_center - half)
-        end = min(times[-1], self.gate_center + half)
-        mask = (times >= start) & (times <= end)
-        if not mask.any():
-            mask[np.argmin(np.abs(times - self.current_time))] = True
-        gate_times = times[mask]
-        gate_db = db[:, mask]
+        start = max(float(times[0]), self.gate_center - half)
+        end = min(float(times[-1]), self.gate_center + half)
+        window = _time_window_slice(times, start, end)
+        gate_times = times[window]
+        if gate_times.size == 0:
+            idx = int(np.argmin(np.abs(times - self.current_time)))
+            window = slice(idx, min(idx + 1, times.size))
+            gate_times = times[window]
+        gate_db = db[:, window]
 
-        subsample = self.config.interactive_subsample if self.fidelity == "Performance" else self.config.hifi_subsample
+        subsample = (
+            self.config.interactive_subsample
+            if self.fidelity == "Performance"
+            else self.config.hifi_subsample
+        )
         sub_t = max(1, int(subsample[0]))
         sub_f = max(1, int(subsample[1]))
         gate_times = gate_times[::sub_t]
         gate_db = gate_db[::sub_f, ::sub_t]
         gate_freqs = freqs[::sub_f]
 
-        T, F = np.meshgrid(gate_times, gate_freqs)
+        time_grid, freq_grid = np.meshgrid(gate_times, gate_freqs, copy=False)
         if self._surface is not None:
             self._surface.remove()
-        self._surface = self.ax3d.plot_surface(T, F, gate_db, cmap=DEFAULT_COLORMAP)
+        self._surface = self.ax3d.plot_surface(time_grid, freq_grid, gate_db, cmap=DEFAULT_COLORMAP)
         self.ax3d.set_xlim(start, end)
         self.ax3d.set_ylim(freqs[0], freqs[-1])
         self.ax3d.set_zlim(self.config.db_floor, self.config.db_ceiling)

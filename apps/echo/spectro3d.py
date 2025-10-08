@@ -4,22 +4,23 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import Optional
 
-import typer
 import numpy as np
+import typer
+
 
 APP_ROOT = Path(__file__).resolve().parent
 SRC_ROOT = APP_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from echo import EchoConfig, load_audio, compute_spectrogram  # noqa: E402
+from echo import EchoConfig, compute_spectrogram, load_audio  # noqa: E402
 from echo.cache import cache_paths, load_cache, save_cache  # noqa: E402
 from echo.mp4 import render_mp4  # noqa: E402
 from echo.playback import AudioPlayback, PlaybackState  # noqa: E402
 from echo.ui_fourpane import FourPaneUI, UIState  # noqa: E402
 from echo.utils import device_summary, log_info  # noqa: E402
+
 
 app = typer.Typer(add_completion=False)
 
@@ -66,17 +67,17 @@ def build_config(**kwargs) -> EchoConfig:
 @app.command()
 def demo(
     wav_path: Path = typer.Argument(..., exists=True, readable=True),
-    mp4: Optional[Path] = typer.Option(None, help="Optional MP4 export path"),
+    mp4: Path | None = typer.Option(None, help="Optional MP4 export path"),
     fps: int = typer.Option(30, help="Output FPS"),
     fast: bool = typer.Option(False, help="Render MP4 with performance LoD"),
-    n_fft: Optional[int] = typer.Option(None, "--n-fft", help="FFT size"),
-    hop_length: Optional[int] = typer.Option(None, "--hop-length", help="Hop length"),
-    win_length: Optional[int] = typer.Option(None, "--win-length", help="Window length"),
-    sr: Optional[int] = typer.Option(None, "--sr", help="Target sample rate"),
-    db_floor: Optional[float] = typer.Option(None, "--db-floor", help="dB floor"),
-    db_ceiling: Optional[float] = typer.Option(None, "--db-ceiling", help="dB ceiling"),
-    gate_width_s: Optional[float] = typer.Option(None, "--gate-width", help="Initial gate width in seconds"),
-    gate_rate: Optional[float] = typer.Option(None, "--gate-rate", help="Gate follow rate"),
+    n_fft: int | None = typer.Option(None, "--n-fft", help="FFT size"),
+    hop_length: int | None = typer.Option(None, "--hop-length", help="Hop length"),
+    win_length: int | None = typer.Option(None, "--win-length", help="Window length"),
+    sr: int | None = typer.Option(None, "--sr", help="Target sample rate"),
+    db_floor: float | None = typer.Option(None, "--db-floor", help="dB floor"),
+    db_ceiling: float | None = typer.Option(None, "--db-ceiling", help="dB ceiling"),
+    gate_width_s: float | None = typer.Option(None, "--gate-width", help="Initial gate width in seconds"),
+    gate_rate: float | None = typer.Option(None, "--gate-rate", help="Gate follow rate"),
     mono: bool = typer.Option(True, "--mono/--stereo", help="Mix to mono"),
     enable_playback: bool = typer.Option(True, "--playback/--no-playback", help="Enable audio playback"),
 ) -> None:
@@ -107,14 +108,14 @@ def demo(
 @app.command()
 def view(
     wav_path: Path = typer.Argument(..., exists=True, readable=True),
-    n_fft: Optional[int] = typer.Option(None, "--n-fft", help="FFT size"),
-    hop_length: Optional[int] = typer.Option(None, "--hop-length", help="Hop length"),
-    win_length: Optional[int] = typer.Option(None, "--win-length", help="Window length"),
-    sr: Optional[int] = typer.Option(None, "--sr", help="Target sample rate"),
-    db_floor: Optional[float] = typer.Option(None, "--db-floor", help="dB floor"),
-    db_ceiling: Optional[float] = typer.Option(None, "--db-ceiling", help="dB ceiling"),
-    gate_width_s: Optional[float] = typer.Option(None, "--gate-width", help="Initial gate width in seconds"),
-    gate_rate: Optional[float] = typer.Option(None, "--gate-rate", help="Gate follow rate"),
+    n_fft: int | None = typer.Option(None, "--n-fft", help="FFT size"),
+    hop_length: int | None = typer.Option(None, "--hop-length", help="Hop length"),
+    win_length: int | None = typer.Option(None, "--win-length", help="Window length"),
+    sr: int | None = typer.Option(None, "--sr", help="Target sample rate"),
+    db_floor: float | None = typer.Option(None, "--db-floor", help="dB floor"),
+    db_ceiling: float | None = typer.Option(None, "--db-ceiling", help="dB ceiling"),
+    gate_width_s: float | None = typer.Option(None, "--gate-width", help="Initial gate width in seconds"),
+    gate_rate: float | None = typer.Option(None, "--gate-rate", help="Gate follow rate"),
     mono: bool = typer.Option(True, "--mono/--stereo", help="Mix to mono"),
     enable_playback: bool = typer.Option(True, "--playback/--no-playback", help="Enable audio playback"),
 ) -> None:
@@ -147,14 +148,14 @@ def render_mp4_cmd(
     fps: int = typer.Option(30, help="Frames per second"),
     codec: str = typer.Option("h264", help="FFmpeg codec"),
     fast: bool = typer.Option(False, help="Use performance LoD"),
-    n_fft: Optional[int] = typer.Option(None, "--n-fft", help="FFT size"),
-    hop_length: Optional[int] = typer.Option(None, "--hop-length", help="Hop length"),
-    win_length: Optional[int] = typer.Option(None, "--win-length", help="Window length"),
-    sr: Optional[int] = typer.Option(None, "--sr", help="Target sample rate"),
-    db_floor: Optional[float] = typer.Option(None, "--db-floor", help="dB floor"),
-    db_ceiling: Optional[float] = typer.Option(None, "--db-ceiling", help="dB ceiling"),
-    gate_width_s: Optional[float] = typer.Option(None, "--gate-width", help="Initial gate width in seconds"),
-    gate_rate: Optional[float] = typer.Option(None, "--gate-rate", help="Gate follow rate"),
+    n_fft: int | None = typer.Option(None, "--n-fft", help="FFT size"),
+    hop_length: int | None = typer.Option(None, "--hop-length", help="Hop length"),
+    win_length: int | None = typer.Option(None, "--win-length", help="Window length"),
+    sr: int | None = typer.Option(None, "--sr", help="Target sample rate"),
+    db_floor: float | None = typer.Option(None, "--db-floor", help="dB floor"),
+    db_ceiling: float | None = typer.Option(None, "--db-ceiling", help="dB ceiling"),
+    gate_width_s: float | None = typer.Option(None, "--gate-width", help="Initial gate width in seconds"),
+    gate_rate: float | None = typer.Option(None, "--gate-rate", help="Gate follow rate"),
     mono: bool = typer.Option(True, "--mono/--stereo", help="Mix to mono"),
     enable_playback: bool = typer.Option(True, "--playback/--no-playback", help="Enable audio playback"),
 ) -> None:
@@ -180,14 +181,14 @@ def render_mp4_cmd(
 @app.command()
 def play(
     wav_path: Path = typer.Argument(..., exists=True, readable=True),
-    n_fft: Optional[int] = typer.Option(None, "--n-fft", help="FFT size"),
-    hop_length: Optional[int] = typer.Option(None, "--hop-length", help="Hop length"),
-    win_length: Optional[int] = typer.Option(None, "--win-length", help="Window length"),
-    sr: Optional[int] = typer.Option(None, "--sr", help="Target sample rate"),
-    db_floor: Optional[float] = typer.Option(None, "--db-floor", help="dB floor"),
-    db_ceiling: Optional[float] = typer.Option(None, "--db-ceiling", help="dB ceiling"),
-    gate_width_s: Optional[float] = typer.Option(None, "--gate-width", help="Initial gate width in seconds"),
-    gate_rate: Optional[float] = typer.Option(None, "--gate-rate", help="Gate follow rate"),
+    n_fft: int | None = typer.Option(None, "--n-fft", help="FFT size"),
+    hop_length: int | None = typer.Option(None, "--hop-length", help="Hop length"),
+    win_length: int | None = typer.Option(None, "--win-length", help="Window length"),
+    sr: int | None = typer.Option(None, "--sr", help="Target sample rate"),
+    db_floor: float | None = typer.Option(None, "--db-floor", help="dB floor"),
+    db_ceiling: float | None = typer.Option(None, "--db-ceiling", help="dB ceiling"),
+    gate_width_s: float | None = typer.Option(None, "--gate-width", help="Initial gate width in seconds"),
+    gate_rate: float | None = typer.Option(None, "--gate-rate", help="Gate follow rate"),
     mono: bool = typer.Option(True, "--mono/--stereo", help="Mix to mono"),
     enable_playback: bool = typer.Option(True, "--playback/--no-playback", help="Enable audio playback"),
 ) -> None:

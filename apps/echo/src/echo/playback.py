@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from threading import Lock
-from typing import Optional
 
 import numpy as np
+
 
 try:  # pragma: no cover - optional dependency
     import sounddevice as sd
@@ -27,13 +27,13 @@ class PlaybackState:
 class AudioPlayback:
     """Lightweight wrapper around ``sounddevice`` output streams."""
 
-    def __init__(self, state: PlaybackState):
+    def __init__(self, state: PlaybackState) -> None:
         state.audio = np.atleast_2d(np.asarray(state.audio, dtype=np.float32))
         self.state = state
-        self._stream: Optional[sd.OutputStream] = None if sd else None
+        self._stream: sd.OutputStream | None = None if sd else None
         self._lock = Lock()
 
-    def _callback(self, outdata, frames, time, status):  # pragma: no cover - realtime code
+    def _callback(self, outdata, frames, time, status) -> None:  # pragma: no cover - realtime code
         if status:
             log_info(f"Playback status: {status}")
         with self._lock:
