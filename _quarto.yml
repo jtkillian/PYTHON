@@ -1,6 +1,12 @@
 project:
-  type: default
-  output-dir: build
+  type: website
+  title: "Python Sandbox"
+  output-dir: docs/_site
+  resources:
+    - README.md
+    - docs/**
+    - data/**
+    - notebooks/**
 
 execute:
   echo: false
@@ -11,6 +17,7 @@ execute:
 
 format:
   html:
+    theme: cosmo
     toc: true
     code-fold: show
     code-tools: true
