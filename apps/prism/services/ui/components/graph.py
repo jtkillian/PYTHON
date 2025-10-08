@@ -16,7 +16,7 @@ def render_graph(graph_path: Path) -> None:
     net = Network(height="450px", width="100%", bgcolor="#0f172a", font_color="white")
     net.barnes_hut()
 
-    # Load from gexf manually to avoid networkx dependency here.
+    # Load the generated GEXF graph using networkx and render via PyVis.
     import networkx as nx
 
     graph = nx.read_gexf(graph_path)

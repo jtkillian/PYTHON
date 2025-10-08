@@ -74,6 +74,13 @@ class Settings:
         except ValueError:
             return default
 
+    def _list(self, name: str, default: List[str]) -> List[str]:
+        value = os.getenv(name)
+        if value is None:
+            return default
+        items = [item.strip() for item in value.split(",") if item.strip()]
+        return items or default
+
     def reload(self) -> None:
         self.api_host = os.getenv("API_HOST", "0.0.0.0")
         self.api_port = self._int("API_PORT", 8000)
@@ -94,6 +101,7 @@ class Settings:
         self.default_screenshots = self._bool("DEFAULT_SCREENSHOTS", False)
         self.default_save_media = self._bool("DEFAULT_SAVE_MEDIA", False)
         self.default_face_match = self._bool("DEFAULT_FACE_MATCH", False)
+        self.allowed_origins = self._list("ALLOWED_ORIGINS", ["http://localhost:8501"])
 
     def default_toggles(self) -> ModuleToggles:
         face_toggle = self.default_face_match and FACE_MODEL.exists()
@@ -117,7 +125,7 @@ logger.addHandler(logging.StreamHandler())
 app = FastAPI(title="PRISM API", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -174,25 +182,27 @@ SECTION_ORDER = [
     ArtifactType.URL.value,
 ]
 
-SECTION_MAP: Dict[str, Tuple[str, int]] = {
-    ArtifactType.PHONE.value: ("Phones", settings.cap_phones),
-    ArtifactType.EMAIL.value: ("Emails", settings.cap_emails),
-    ArtifactType.USERNAME.value: ("Usernames", settings.cap_usernames),
-    ArtifactType.ADDRESS.value: ("Addresses", settings.cap_addresses),
-    ArtifactType.LOCATION.value: ("Locations", settings.cap_locations),
-    ArtifactType.VEHICLE.value: ("Vehicles", settings.cap_vehicles),
-    ArtifactType.PLATE.value: ("Plates", settings.cap_plates),
-    ArtifactType.DEVICE.value: ("Devices", settings.cap_devices),
-    ArtifactType.IP.value: ("IP Addresses", settings.cap_ips),
-    ArtifactType.URL.value: ("Links", settings.cap_urls),
-}
+def get_section_map() -> Dict[str, Tuple[str, int]]:
+    return {
+        ArtifactType.PHONE.value: ("Phones", settings.cap_phones),
+        ArtifactType.EMAIL.value: ("Emails", settings.cap_emails),
+        ArtifactType.USERNAME.value: ("Usernames", settings.cap_usernames),
+        ArtifactType.ADDRESS.value: ("Addresses", settings.cap_addresses),
+        ArtifactType.LOCATION.value: ("Locations", settings.cap_locations),
+        ArtifactType.VEHICLE.value: ("Vehicles", settings.cap_vehicles),
+        ArtifactType.PLATE.value: ("Plates", settings.cap_plates),
+        ArtifactType.DEVICE.value: ("Devices", settings.cap_devices),
+        ArtifactType.IP.value: ("IP Addresses", settings.cap_ips),
+        ArtifactType.URL.value: ("Links", settings.cap_urls),
+    }
 
 
 def group_artifacts(artifacts: Iterable[dict]) -> Dict[str, List[dict]]:
     buckets: Dict[str, List[dict]] = defaultdict(list)
+    section_map = get_section_map()
     for artifact in artifacts:
         artifact_type = artifact.get("type")
-        label, limit = SECTION_MAP.get(artifact_type, ("Other", 10))
+        label, limit = section_map.get(artifact_type, ("Other", 10))
         if len(buckets[label]) >= limit:
             continue
         buckets[label].append(
@@ -204,7 +214,7 @@ def group_artifacts(artifacts: Iterable[dict]) -> Dict[str, List[dict]]:
         )
     ordered: Dict[str, List[dict]] = {}
     for type_key in SECTION_ORDER:
-        label, _ = SECTION_MAP.get(type_key, (None, None))
+        label, _ = section_map.get(type_key, (None, None))
         if label and label in buckets:
             ordered[label] = buckets[label]
     for label, items in buckets.items():

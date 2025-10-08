@@ -117,4 +117,7 @@ async def run(query: Optional[str], workspace: Path) -> CollectorResult:
     if results:
         result.raw_artifacts[raw_filename] = json.dumps(results, indent=2)
 
+    for filename, content in result.raw_artifacts.items():
+        (workspace / filename).write_text(content, encoding="utf-8")
+
     return result

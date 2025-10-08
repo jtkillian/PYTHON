@@ -1,6 +1,7 @@
 """Streamlit components for displaying highlights."""
 from __future__ import annotations
 
+from html import escape
 from typing import List, Mapping
 
 import streamlit as st
@@ -16,13 +17,16 @@ def render_highlights(highlights: List[Mapping[str, str]]) -> None:
     cols = st.columns(2)
     for idx, highlight in enumerate(highlights):
         column = cols[idx % 2]
+        title = escape(str(highlight.get("title", "")))
+        description = escape(str(highlight.get("description", "")))
+        confidence = escape(str(highlight.get("confidence", "")))
         with column:
             st.markdown(
                 f"""
                 <div class="highlight-card">
-                    <strong>{highlight.get('title')}</strong><br />
-                    <span>{highlight.get('description')}</span><br />
-                    <small>Confidence: {highlight.get('confidence')}</small>
+                    <strong>{title}</strong><br />
+                    <span>{description}</span><br />
+                    <small>Confidence: {confidence}</small>
                 </div>
                 """,
                 unsafe_allow_html=True,
