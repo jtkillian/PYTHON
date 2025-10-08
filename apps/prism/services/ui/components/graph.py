@@ -25,6 +25,5 @@ def render_graph(graph_path: Path) -> None:
     for source, target, data in graph.edges(data=True):
         net.add_edge(source, target, title=data.get("source", ""))
 
-    html_path = graph_path.with_suffix(".html")
-    net.write_html(html_path)
-    components.html(html_path.read_text(encoding="utf-8"), height=480, scrolling=True)
+    html = net.generate_html(notebook=False)
+    components.html(html, height=480, scrolling=True)
