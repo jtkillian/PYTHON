@@ -51,7 +51,7 @@ Add new collectors under `services/api/runners/` and corresponding normalizers u
 ## Testing & Development Notes
 
 - The backend uses SQLAlchemy with an async engine for compatibility with FastAPI.
-- Configuration caps are loaded via Pydantic settings; environment overrides are respected.
+- Configuration caps are loaded via a custom Settings class; environment overrides are respected.
 - All collectors are optional and default to disabled heavy operations (screenshots, HTML archiving, paid APIs).
 - Summaries are produced in both markdown and JSON to support downstream ingestion.
 
