@@ -1,10 +1,10 @@
 """Lightweight web search collector."""
+
 from __future__ import annotations
 
 import json
 import re
 from pathlib import Path
-from typing import List, Optional
 
 import httpx
 from bs4 import BeautifulSoup
@@ -18,13 +18,14 @@ from ..models import (
     ProvenanceRecord,
 )
 
+
 SEARCH_URL = "https://duckduckgo.com/html/"
 EMAIL_RE = re.compile(r"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", re.IGNORECASE)
 PHONE_RE = re.compile(r"\+?\d[\d\-\s]{7,}\d")
 IP_RE = re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b")
 
 
-async def fetch_results(query: str, max_results: int = 10) -> List[dict]:
+async def fetch_results(query: str, max_results: int = 10) -> list[dict]:
     async with httpx.AsyncClient(timeout=10.0, headers={"User-Agent": "PRISM/1.0"}) as client:
         response = await client.post(SEARCH_URL, data={"q": query})
         response.raise_for_status()
@@ -38,17 +39,21 @@ async def fetch_results(query: str, max_results: int = 10) -> List[dict]:
             snippet_elem = result.select_one(".result__snippet")
             if not link_elem:
                 continue
+            title_text = (
+                title_elem.get_text(strip=True) if title_elem else link_elem.get_text(strip=True)
+            )
+            snippet_text = snippet_elem.get_text(strip=True) if snippet_elem else ""
             results.append(
                 {
-                    "title": title_elem.get_text(strip=True) if title_elem else link_elem.get_text(strip=True),
+                    "title": title_text,
                     "url": link_elem.get("href"),
-                    "snippet": snippet_elem.get_text(strip=True) if snippet_elem else "",
+                    "snippet": snippet_text,
                 }
             )
         return results
 
 
-async def run(query: Optional[str], workspace: Path) -> CollectorResult:
+async def run(query: str | None, workspace: Path) -> CollectorResult:
     result = CollectorResult(collector=CollectorName.WEBSEARCH)
     if not query:
         result.notes.append("No query provided; skipping web search")
@@ -118,8 +123,6 @@ async def run(query: Optional[str], workspace: Path) -> CollectorResult:
         result.raw_artifacts[raw_filename] = json.dumps(results, indent=2)
 
     # Write raw artifacts to disk before returning
-    for filename, content in result.raw_artifacts.items():
-        (workspace / filename).write_text(content, encoding="utf-8")
     for filename, content in result.raw_artifacts.items():
         (workspace / filename).write_text(content, encoding="utf-8")
 

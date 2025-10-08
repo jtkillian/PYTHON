@@ -1,13 +1,13 @@
 """Streamlit components for displaying highlights."""
 from __future__ import annotations
 
+from collections.abc import Mapping
 from html import escape
-from typing import List, Mapping
 
 import streamlit as st
 
 
-def render_highlights(highlights: List[Mapping[str, str]]) -> None:
+def render_highlights(highlights: list[Mapping[str, str]]) -> None:
     """Render highlight cards in a responsive layout."""
 
     if not highlights:

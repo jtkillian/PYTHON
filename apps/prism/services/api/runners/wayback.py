@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import List, Optional
 
 import httpx
 
@@ -16,10 +15,11 @@ from ..models import (
     ProvenanceRecord,
 )
 
+
 WAYBACK_URL = "https://web.archive.org/cdx/search/cdx"
 
 
-async def fetch_wayback(query: str) -> List[dict]:
+async def fetch_wayback(query: str) -> list[dict]:
     params = {
         "url": f"*{query}*",
         "output": "json",
@@ -36,12 +36,12 @@ async def fetch_wayback(query: str) -> List[dict]:
         headers = payload[0]
         results = []
         for row in payload[1:]:
-            record = dict(zip(headers, row))
+            record = dict(zip(headers, row, strict=False))
             results.append(record)
         return results
 
 
-async def run(query: Optional[str], workspace: Path) -> CollectorResult:
+async def run(query: str | None, workspace: Path) -> CollectorResult:
     result = CollectorResult(collector=CollectorName.WAYBACK)
     if not query:
         result.notes.append("No query provided; skipping Wayback")
@@ -58,7 +58,7 @@ async def run(query: Optional[str], workspace: Path) -> CollectorResult:
 
     for idx, record in enumerate(records[:10]):
         url = f"https://web.archive.org/web/{record.get('timestamp')}/{record.get('original')}"
-        description = f"Archived {record.get('mime')} ({record.get('length', 'unknown')} bytes)"
+        f"Archived {record.get('mime')} ({record.get('length', 'unknown')} bytes)"
         result.artifacts.append(
             ArtifactRecord(
                 type=ArtifactType.URL,

@@ -6,22 +6,26 @@ $ErrorActionPreference = "Stop"
 
 Write-Host "[PRISM] Initializing directories at $Root"
 
+$dataPath = Join-Path -Path $Root -ChildPath "data"
+$artifactPath = Join-Path -Path $dataPath -ChildPath "artifacts"
+$outputPath = Join-Path -Path $Root -ChildPath "output"
+
 $paths = @(
-    Join-Path $Root "data",
-    Join-Path $Root "data\artifacts",
-    Join-Path $Root "output"
+    $dataPath
+    $artifactPath
+    $outputPath
 )
 
 foreach ($path in $paths) {
     if (-not (Test-Path $path)) {
         Write-Host "[PRISM] Creating $path"
-        New-Item -ItemType Directory -Path $path | Out-Null
+        New-Item -ItemType Directory -Path $path -Force | Out-Null
     } else {
         Write-Host "[PRISM] Found $path"
     }
 }
 
-$dbPath = Join-Path $Root "data\prism.db"
+$dbPath = Join-Path -Path $dataPath -ChildPath "prism.db"
 
 if (-not (Test-Path $dbPath)) {
     Write-Host "[PRISM] Creating SQLite database at $dbPath"

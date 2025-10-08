@@ -1,17 +1,18 @@
 """SQLite storage helpers for PRISM."""
+
 from __future__ import annotations
 
 import asyncio
 from collections.abc import AsyncGenerator, Iterable
 from datetime import datetime
 from pathlib import Path
-from typing import List
 
-from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from .models import CollectorResult, PersonInput
+
 
 PRISM_ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = PRISM_ROOT / "data"
@@ -34,9 +35,18 @@ class Person(Base):
     username: Mapped[str | None] = mapped_column(String, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    artifacts: Mapped[List["Artifact"]] = relationship(back_populates="person", cascade="all, delete-orphan")
-    highlights: Mapped[List["Highlight"]] = relationship(back_populates="person", cascade="all, delete-orphan")
-    provenance: Mapped[List["Provenance"]] = relationship(back_populates="person", cascade="all, delete-orphan")
+    artifacts: Mapped[list[Artifact]] = relationship(
+        back_populates="person",
+        cascade="all, delete-orphan",
+    )
+    highlights: Mapped[list[Highlight]] = relationship(
+        back_populates="person",
+        cascade="all, delete-orphan",
+    )
+    provenance: Mapped[list[Provenance]] = relationship(
+        back_populates="person",
+        cascade="all, delete-orphan",
+    )
 
 
 class Artifact(Base):
@@ -100,14 +110,10 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
 
 
 async def upsert_person(session: AsyncSession, slug: str, payload: PersonInput) -> Person:
-    result = await session.execute(
-        Person.__table__.select().where(Person.slug == slug)
-    )
-    row = result.first()
+    row = await session.scalar(select(Person).where(Person.slug == slug))
     now = datetime.utcnow()
-    if row:
-        person = await session.get(Person, row["id"])
-        assert person is not None
+    if row is not None:
+        person = row
         person.name = payload.name
         person.phone = payload.phone
         person.email = payload.email
@@ -128,12 +134,16 @@ async def upsert_person(session: AsyncSession, slug: str, payload: PersonInput) 
 
 
 async def clear_previous(session: AsyncSession, person: Person) -> None:
-    await session.execute(Artifact.__table__.delete().where(Artifact.person_id == person.id))
-    await session.execute(Highlight.__table__.delete().where(Highlight.person_id == person.id))
-    await session.execute(Provenance.__table__.delete().where(Provenance.person_id == person.id))
+    await session.execute(delete(Artifact).where(Artifact.person_id == person.id))
+    await session.execute(delete(Highlight).where(Highlight.person_id == person.id))
+    await session.execute(delete(Provenance).where(Provenance.person_id == person.id))
 
 
-async def persist_results(session: AsyncSession, person: Person, results: Iterable[CollectorResult]) -> None:
+async def persist_results(
+    session: AsyncSession,
+    person: Person,
+    results: Iterable[CollectorResult],
+) -> None:
     for result in results:
         for artifact in result.artifacts:
             raw_path = None
@@ -174,9 +184,15 @@ async def persist_results(session: AsyncSession, person: Person, results: Iterab
 
 
 async def fetch_person_summary(session: AsyncSession, person: Person) -> dict:
-    artifacts_result = await session.execute(Artifact.__table__.select().where(Artifact.person_id == person.id))
-    highlights_result = await session.execute(Highlight.__table__.select().where(Highlight.person_id == person.id))
-    provenance_result = await session.execute(Provenance.__table__.select().where(Provenance.person_id == person.id))
+    artifacts_result = await session.execute(
+        Artifact.__table__.select().where(Artifact.person_id == person.id)
+    )
+    highlights_result = await session.execute(
+        Highlight.__table__.select().where(Highlight.person_id == person.id)
+    )
+    provenance_result = await session.execute(
+        Provenance.__table__.select().where(Provenance.person_id == person.id)
+    )
 
     return {
         "artifacts": [dict(row) for row in artifacts_result.mappings()],

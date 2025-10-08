@@ -8,6 +8,21 @@ version = "0.1.0"
 description = "Public mono-repo for notebooks (tutoring), reusable Python modules, tests, and docs."
 requires-python = ">=3.10"
 
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["apps.*"]
+exclude = [
+	"apps.*.tests*",
+	"apps.*.notebooks*",
+	"apps.*.docs*",
+	"packages*",
+	"data*",
+	"reports*",
+	"notebooks*",
+	"tests*",
+]
+namespaces = true
+
 
 [tool.black]
 line-length = 100

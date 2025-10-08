@@ -3,9 +3,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from pyvis.network import Network
 import streamlit as st
 import streamlit.components.v1 as components
+from pyvis.network import Network
 
 
 def render_graph(graph_path: Path) -> None:

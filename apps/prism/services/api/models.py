@@ -1,11 +1,11 @@
 """Data models and schemas for PRISM services."""
 from __future__ import annotations
 
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Sequence
 
 from pydantic import BaseModel, Field, HttpUrl
 
@@ -43,7 +43,7 @@ class ArtifactRecord:
     value: str
     confidence: float
     source: CollectorName
-    raw_path: Optional[Path] = None
+    raw_path: Path | None = None
 
 
 @dataclass(slots=True)
@@ -69,11 +69,11 @@ class CollectorResult:
     """Returned payload from a collector run."""
 
     collector: CollectorName
-    raw_artifacts: Dict[str, str] = field(default_factory=dict)
-    artifacts: List[ArtifactRecord] = field(default_factory=list)
-    highlights: List[HighlightRecord] = field(default_factory=list)
-    provenance: List[ProvenanceRecord] = field(default_factory=list)
-    notes: List[str] = field(default_factory=list)
+    raw_artifacts: dict[str, str] = field(default_factory=dict)
+    artifacts: list[ArtifactRecord] = field(default_factory=list)
+    highlights: list[HighlightRecord] = field(default_factory=list)
+    provenance: list[ProvenanceRecord] = field(default_factory=list)
+    notes: list[str] = field(default_factory=list)
 
 
 class ModuleToggles(BaseModel):
@@ -91,11 +91,11 @@ class ModuleToggles(BaseModel):
 
 class PersonInput(BaseModel):
     name: str = Field(..., description="Target full name")
-    phone: Optional[str] = Field(None, description="Phone number including country code")
-    email: Optional[str] = Field(None, description="Email address")
-    username: Optional[str] = Field(None, description="Username or handle")
-    location: Optional[str] = Field(None, description="Known location or address snippet")
-    image_url: Optional[HttpUrl] = Field(None, description="Optional image URL for face matching")
+    phone: str | None = Field(None, description="Phone number including country code")
+    email: str | None = Field(None, description="Email address")
+    username: str | None = Field(None, description="Username or handle")
+    location: str | None = Field(None, description="Known location or address snippet")
+    image_url: HttpUrl | None = Field(None, description="Optional image URL for face matching")
 
 
 class ScanRequest(BaseModel):
@@ -105,25 +105,25 @@ class ScanRequest(BaseModel):
 
 class SummarySection(BaseModel):
     label: str
-    items: List[Dict[str, str]]
+    items: list[dict[str, str]]
 
 
 class ScanSummary(BaseModel):
     slug: str
     created_at: datetime
     name: str
-    highlights: List[Dict[str, str]]
-    sections: List[SummarySection]
-    smart_picks: List[Dict[str, str]]
-    provenance: List[Dict[str, str]]
-    modules_run: List[str]
+    highlights: list[dict[str, str]]
+    sections: list[SummarySection]
+    smart_picks: list[dict[str, str]]
+    provenance: list[dict[str, str]]
+    modules_run: list[str]
 
 
 class ScanStatus(BaseModel):
     job_id: str
     status: str
     slug: str
-    message: Optional[str] = None
+    message: str | None = None
 
 
 class ScanResponse(BaseModel):
@@ -136,23 +136,23 @@ class PersonRecord(BaseModel):
     id: int
     slug: str
     name: str
-    phone: Optional[str]
-    email: Optional[str]
-    username: Optional[str]
+    phone: str | None
+    email: str | None
+    username: str | None
     created_at: datetime
 
     class Config:
         from_attributes = True
 
 
-def as_dicts(records: Iterable[HighlightRecord]) -> List[Dict[str, str]]:
+def as_dicts(records: Iterable[HighlightRecord]) -> list[dict[str, str]]:
     return [
         {"title": rec.title, "description": rec.description, "confidence": f"{rec.confidence:.2f}"}
         for rec in records
     ]
 
 
-def flatten_artifacts(artifacts: Sequence[ArtifactRecord]) -> List[Dict[str, str]]:
+def flatten_artifacts(artifacts: Sequence[ArtifactRecord]) -> list[dict[str, str]]:
     return [
         {
             "type": artifact.type.value,

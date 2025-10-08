@@ -1,4 +1,5 @@
 """FastAPI application for PRISM."""
+
 from __future__ import annotations
 
 import asyncio
@@ -6,9 +7,9 @@ import json
 import logging
 import os
 from collections import defaultdict
+from collections.abc import Iterable
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Iterable, List, Tuple
 
 import networkx as nx
 import orjson
@@ -30,18 +31,19 @@ from .models import (
 )
 from .runners import phoneinfoga, sherlock, wayback, websearch
 
+
 # Integration stubs
 
 
-def oracle_stub(summary: Dict) -> None:  # pragma: no cover - placeholder
+def oracle_stub(summary: dict) -> None:  # pragma: no cover - placeholder
     logging.getLogger("prism").debug("ORACLE stub called", extra={"summary": summary})
 
 
-def aegis_stub(payload: Dict) -> None:  # pragma: no cover - placeholder
+def aegis_stub(payload: dict) -> None:  # pragma: no cover - placeholder
     logging.getLogger("prism").debug("AEGIS stub called", extra={"payload": payload})
 
 
-def citadel_stub(_: Dict) -> None:  # pragma: no cover - placeholder
+def citadel_stub(_: dict) -> None:  # pragma: no cover - placeholder
     logging.getLogger("prism").debug("CITADEL stub called")
 
 
@@ -74,7 +76,7 @@ class Settings:
         except ValueError:
             return default
 
-    def _list(self, name: str, default: List[str]) -> List[str]:
+    def _list(self, name: str, default: list[str]) -> list[str]:
         value = os.getenv(name)
         if value is None:
             return default
@@ -140,11 +142,15 @@ async def startup() -> None:
     await storage.init_db()
 
 
-async def run_collectors(person: PersonInput, toggles: ModuleToggles, slug: str) -> List[CollectorResult]:
+async def run_collectors(
+    person: PersonInput,
+    toggles: ModuleToggles,
+    slug: str,
+) -> list[CollectorResult]:
     workspace = OUTPUT_DIR / slug / "artifacts"
     workspace.mkdir(parents=True, exist_ok=True)
 
-    collectors: List[asyncio.Task[CollectorResult]] = []
+    collectors: list[asyncio.Task[CollectorResult]] = []
 
     if toggles.sherlock:
         collectors.append(asyncio.create_task(sherlock.run(person.username, workspace)))
@@ -154,13 +160,14 @@ async def run_collectors(person: PersonInput, toggles: ModuleToggles, slug: str)
         search_term = person.email or person.phone or person.username or person.name
         collectors.append(asyncio.create_task(wayback.run(search_term, workspace)))
     if toggles.websearch:
-        query = " ".join(filter(None, [person.name, person.username, person.email, person.phone or ""]))
-        collectors.append(asyncio.create_task(websearch.run(query.strip() or None, workspace)))
+        query_parts = [person.name, person.username, person.email, person.phone or ""]
+        query = " ".join(filter(None, query_parts)).strip() or None
+        collectors.append(asyncio.create_task(websearch.run(query, workspace)))
 
     if not collectors:
         return []
 
-    results: List[CollectorResult] = []
+    results: list[CollectorResult] = []
     for task in asyncio.as_completed(collectors):
         try:
             results.append(await task)
@@ -182,7 +189,8 @@ SECTION_ORDER = [
     ArtifactType.URL.value,
 ]
 
-def get_section_map() -> Dict[str, Tuple[str, int]]:
+
+def get_section_map() -> dict[str, tuple[str, int]]:
     return {
         ArtifactType.PHONE.value: ("Phones", settings.cap_phones),
         ArtifactType.EMAIL.value: ("Emails", settings.cap_emails),
@@ -197,8 +205,8 @@ def get_section_map() -> Dict[str, Tuple[str, int]]:
     }
 
 
-def group_artifacts(artifacts: Iterable[dict]) -> Dict[str, List[dict]]:
-    buckets: Dict[str, List[dict]] = defaultdict(list)
+def group_artifacts(artifacts: Iterable[dict]) -> dict[str, list[dict]]:
+    buckets: dict[str, list[dict]] = defaultdict(list)
     section_map = get_section_map()
     for artifact in artifacts:
         artifact_type = artifact.get("type")
@@ -212,7 +220,7 @@ def group_artifacts(artifacts: Iterable[dict]) -> Dict[str, List[dict]]:
                 "source": artifact.get("source") or "unknown",
             }
         )
-    ordered: Dict[str, List[dict]] = {}
+    ordered: dict[str, list[dict]] = {}
     for type_key in SECTION_ORDER:
         label, _ = section_map.get(type_key, (None, None))
         if label and label in buckets:
@@ -223,23 +231,26 @@ def group_artifacts(artifacts: Iterable[dict]) -> Dict[str, List[dict]]:
     return ordered
 
 
-def generate_mmr(items: List[str], limit: int) -> List[str]:
+def generate_mmr(items: list[str], limit: int) -> list[str]:
     if not items:
         return []
     items = list(dict.fromkeys(items))
-    selected: List[str] = []
+    selected: list[str] = []
     lambda_param = 0.7
     while items and len(selected) < limit:
         if not selected:
             selected.append(items.pop(0))
             continue
-        candidates = []
+
+        candidates: list[tuple[float, str]] = []
         for item in items:
             relevance = len(item)
-            diversity = min(len(item), *(abs(len(item) - len(s)) for s in selected)) if selected else len(item)
+            distances = [abs(len(item) - len(existing)) for existing in selected]
+            diversity = min([len(item), *distances]) if distances else len(item)
             score = lambda_param * relevance - (1 - lambda_param) * diversity
             candidates.append((score, item))
-        candidates.sort(reverse=True, key=lambda x: x[0])
+
+        candidates.sort(reverse=True, key=lambda candidate: candidate[0])
         best = candidates[0][1]
         selected.append(best)
         items.remove(best)
@@ -285,24 +296,39 @@ def build_map(slug: str, artifacts: Iterable[dict]) -> None:
 def write_outputs(slug: str, person: PersonInput, summary: ScanSummary) -> None:
     output_dir = OUTPUT_DIR / slug
     output_dir.mkdir(parents=True, exist_ok=True)
-    markdown_lines = [f"# Findings for {person.name}", "", f"Generated: {summary.created_at.isoformat()}"]
+    markdown_lines = [
+        f"# Findings for {person.name}",
+        "",
+        f"Generated: {summary.created_at.isoformat()}",
+    ]
     markdown_lines.append("\n## Top Highlights\n")
     for highlight in summary.highlights:
-        markdown_lines.append(f"- **{highlight['title']}** — {highlight['description']} (confidence {highlight['confidence']})")
+        highlight_line = (
+            f"- **{highlight['title']}** — {highlight['description']} "
+            f"(confidence {highlight['confidence']})"
+        )
+        markdown_lines.append(highlight_line)
     markdown_lines.append("\n## Sections\n")
     for section in summary.sections:
         markdown_lines.append(f"### {section.label}")
         for item in section.items:
-            markdown_lines.append(f"- {item['value']} ({item.get('source')}) — confidence {item.get('confidence')}")
+            item_line = (
+                f"- {item['value']} ({item.get('source')}) "
+                f"— confidence {item.get('confidence')}"
+            )
+            markdown_lines.append(item_line)
         markdown_lines.append("")
     markdown_lines.append("\n## Smart Picks\n")
     for pick in summary.smart_picks:
         markdown_lines.append(f"- {pick['text']} (source: {pick['source']})")
     markdown_lines.append("\n## Provenance\n")
     for prov in summary.provenance:
-        markdown_lines.append(f"- {prov['source']}: {prov['reference']} — {prov['description']}")
+        prov_line = f"- {prov['source']}: {prov['reference']} " f"— {prov['description']}"
+        markdown_lines.append(prov_line)
     (output_dir / "Findings.md").write_text("\n".join(markdown_lines), encoding="utf-8")
-    (output_dir / "Findings.json").write_bytes(orjson.dumps(summary.model_dump(mode='json'), option=orjson.OPT_INDENT_2))
+    findings_payload = summary.model_dump(mode="json")
+    findings_bytes = orjson.dumps(findings_payload, option=orjson.OPT_INDENT_2)
+    (output_dir / "Findings.json").write_bytes(findings_bytes)
 
 
 async def orchestrate_scan(payload: ScanRequest) -> ScanSummary:
@@ -314,7 +340,9 @@ async def orchestrate_scan(payload: ScanRequest) -> ScanSummary:
     toggle_data = settings.default_toggles().model_dump()
     toggle_data.update(payload.toggles.model_dump())
     if FACE_MODEL.exists():
-        toggle_data["face_match"] = toggle_data.get("face_match", False) or settings.default_face_match
+        toggle_data["face_match"] = (
+            toggle_data.get("face_match", False) or settings.default_face_match
+        )
     else:
         toggle_data["face_match"] = False
     toggles = ModuleToggles(**toggle_data)
@@ -388,5 +416,5 @@ async def scan(payload: ScanRequest) -> ScanResponse:
 
 
 @app.get("/health")
-async def health() -> Dict[str, object]:
+async def health() -> dict[str, object]:
     return {"status": "ok", "face_model": FACE_MODEL.exists()}
