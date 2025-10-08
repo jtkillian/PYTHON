@@ -9,12 +9,12 @@ import numpy as np
 
 try:  # pragma: no cover - optional dependency
     import torch
-except Exception:  # pragma: no cover - fallback
+except ImportError:  # pragma: no cover - fallback
     torch = None  # type: ignore
 
 try:  # pragma: no cover - optional dependency
     import librosa
-except Exception:  # pragma: no cover - fallback
+except ImportError:  # pragma: no cover - fallback
     librosa = None  # type: ignore
 
 from .config import EchoConfig
