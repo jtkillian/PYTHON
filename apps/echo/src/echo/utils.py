@@ -11,7 +11,7 @@ import numpy as np
 
 try:  # pragma: no cover - optional dependency
     import torch
-except Exception:  # pragma: no cover - torch optional
+except ImportError:  # pragma: no cover - torch optional
     torch = None  # type: ignore
 
 
