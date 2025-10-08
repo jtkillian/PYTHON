@@ -1,0 +1,5 @@
+/output/
+/data/prism.db
+/data/artifacts/
+__pycache__/
+.env
