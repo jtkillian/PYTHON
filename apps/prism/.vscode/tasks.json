@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/microsoft/vscode/master/extensions/configuration-editing/snippets/tasks.json",
+  "$schema": "https://json.schemastore.org/vscode/tasks.json",
   "version": "2.0.0",
   "tasks": [
     {
