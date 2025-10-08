@@ -10,7 +10,7 @@ import numpy as np
 
 try:  # pragma: no cover - optional dependency
     import sounddevice as sd
-except Exception:  # pragma: no cover - fallback when sounddevice missing
+except ImportError:  # pragma: no cover - fallback when sounddevice missing
     sd = None  # type: ignore
 
 from .utils import log_info
