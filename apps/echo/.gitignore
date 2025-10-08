@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+*.pyo
+*.log
+.cache/
+.ipynb_checkpoints/
+dist/
+assets/wav/*.wav
