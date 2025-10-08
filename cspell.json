@@ -1,0 +1,47 @@
+{
+    "version": "0.2",
+    "language": "en",
+    "ignorePaths": [
+        "**/.git/**",
+        "**/.venv/**",
+        "**/node_modules/**",
+        "**/.mypy_cache/**",
+        "**/.pytest_cache/**",
+        "**/.ruff_cache/**",
+        "**/.ipynb_checkpoints/**",
+        "data/**",
+        "reports/**",
+        "packages/**/build/**",
+        "apps/**/build/**"
+    ],
+    "files": [
+        "README.md",
+        "apps/**/*.md",
+        "docs/**/*.{md,tex}",
+        "notebooks/**/*.md"
+    ],
+    "words": [
+        "aegis",
+        "anisotropic",
+        "backprop",
+        "citadel",
+        "conda",
+        "datatable",
+        "dataclass",
+        "jax",
+        "jdw",
+        "matplotlib",
+        "mvvm",
+        "plotly",
+        "quarto",
+        "scikit",
+        "streamlit",
+        "sympy",
+        "testmon",
+        "timeseries",
+        "torchscript",
+        "vega",
+        "widget",
+        "widgets"
+    ]
+}
