@@ -302,7 +302,7 @@ def write_outputs(slug: str, person: PersonInput, summary: ScanSummary) -> None:
     for prov in summary.provenance:
         markdown_lines.append(f"- {prov['source']}: {prov['reference']} — {prov['description']}")
     (output_dir / "Findings.md").write_text("\n".join(markdown_lines), encoding="utf-8")
-    (output_dir / "Findings.json").write_bytes(orjson.dumps(summary.model_dump(), option=orjson.OPT_INDENT_2))
+    (output_dir / "Findings.json").write_bytes(orjson.dumps(summary.model_dump(mode='json'), option=orjson.OPT_INDENT_2))
 
 
 async def orchestrate_scan(payload: ScanRequest) -> ScanSummary:
