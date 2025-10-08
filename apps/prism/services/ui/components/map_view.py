@@ -21,6 +21,5 @@ def render_map(geojson_path: Path) -> None:
 
     fmap = folium.Map(location=[0, 0], zoom_start=2)
     folium.GeoJson(data).add_to(fmap)
-    html_path = geojson_path.with_suffix(".map.html")
-    fmap.save(html_path)
-    components.html(html_path.read_text(encoding="utf-8"), height=400)
+    html = fmap.get_root().render()
+    components.html(html, height=400)
