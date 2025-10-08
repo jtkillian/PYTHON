@@ -47,11 +47,11 @@ def prepare_state(path: Path, config: EchoConfig) -> tuple[UIState, np.ndarray, 
     else:
         result = cached
 
-    db = result["db"]
+    db = np.asarray(result["db"], dtype=np.float32)
     if db.ndim == 3:
         db = db[0]
-    times = result["times"]
-    freqs = result["freqs"]
+    times = np.asarray(result["times"], dtype=np.float32)
+    freqs = np.asarray(result["freqs"], dtype=np.float32)
     duration = max(times[-1], audio.shape[-1] / sr) if times.size else audio.shape[-1] / sr
     waveform = audio if audio.ndim == 1 else audio[0]
     waveform = np.asarray(waveform, dtype=np.float32)

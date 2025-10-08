@@ -7,14 +7,17 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
 import numpy as np
+from matplotlib import colors as mcolors
 from matplotlib import pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.widgets import Slider
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 
 if TYPE_CHECKING:
     from matplotlib.backend_bases import CloseEvent, KeyEvent, MouseEvent
     from mpl_toolkits.mplot3d import Axes3D
+    from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 from .colormap import DEFAULT_COLORMAP
 from .config import EchoConfig
@@ -66,6 +69,12 @@ class FourPaneUI:
         self.fine_step = config.fine_step
         self.fine_step_alt = config.fine_step_alt
         self.gate_center = 0.0
+
+        self._surface: Poly3DCollection | None = None
+        self._surface_shape: tuple[int, int] | None = None
+        self._surface_polys: np.ndarray | None = None
+        self._surface_avg: np.ndarray | None = None
+        self._surface_norm = mcolors.Normalize(vmin=self.config.db_floor, vmax=self.config.db_ceiling)
 
         self.figure = plt.figure(figsize=(12, 8))
         manager = getattr(self.figure.canvas, "manager", None)
@@ -251,6 +260,22 @@ class FourPaneUI:
         idx = int(np.argmin(np.abs(times - self.current_time)))
         self.slice_line.set_ydata(self.state.db[:, idx])
 
+    def _ensure_surface_polys(self, rows: int, cols: int) -> np.ndarray:
+        if rows <= 0 or cols <= 0:
+            raise ValueError("Surface requires at least 2x2 samples")
+        shape = (rows, cols, 4, 3)
+        if self._surface_polys is None or self._surface_polys.shape != shape:
+            self._surface_polys = np.empty(shape, dtype=np.float32)
+        return self._surface_polys
+
+    def _ensure_surface_avg(self, rows: int, cols: int) -> np.ndarray:
+        if rows <= 0 or cols <= 0:
+            raise ValueError("Surface requires at least 2x2 samples")
+        shape = (rows, cols)
+        if self._surface_avg is None or self._surface_avg.shape != shape:
+            self._surface_avg = np.empty(shape, dtype=np.float32)
+        return self._surface_avg
+
     def update_3d(self) -> None:
         times = self.state.times
         freqs = self.state.freqs
@@ -258,9 +283,6 @@ class FourPaneUI:
 
         if times.size == 0 or freqs.size == 0:
             return
-
-        if not hasattr(self, "_surface"):
-            self._surface = None
 
         follow = min(1.0, 0.1 * self.gate_rate)
         self.gate_center += (self.current_time - self.gate_center) * follow
@@ -301,10 +323,70 @@ class FourPaneUI:
         if gate_times.size == 0 or gate_freqs.size == 0:
             return
 
-        time_grid, freq_grid = np.meshgrid(gate_times, gate_freqs, copy=False)
-        if self._surface is not None:
-            self._surface.remove()
-        self._surface = self.ax3d.plot_surface(time_grid, freq_grid, gate_db, cmap=DEFAULT_COLORMAP)
+        gate_times = np.asarray(gate_times, dtype=np.float32)
+        gate_freqs = np.asarray(gate_freqs, dtype=np.float32)
+        gate_db = np.asarray(gate_db, dtype=np.float32)
+
+        cell_rows = gate_db.shape[0] - 1
+        cell_cols = gate_db.shape[1] - 1
+        if cell_rows <= 0 or cell_cols <= 0:
+            return
+
+        polys = self._ensure_surface_polys(cell_rows, cell_cols)
+        avg_values = self._ensure_surface_avg(cell_rows, cell_cols)
+
+        polys[..., 0, 0] = gate_times[:-1]
+        polys[..., 1, 0] = gate_times[:-1]
+        polys[..., 2, 0] = gate_times[1:]
+        polys[..., 3, 0] = gate_times[1:]
+
+        freq_lo = gate_freqs[:-1][:, None]
+        freq_hi = gate_freqs[1:][:, None]
+        polys[..., 0, 1] = freq_lo
+        polys[..., 1, 1] = freq_hi
+        polys[..., 2, 1] = freq_hi
+        polys[..., 3, 1] = freq_lo
+
+        polys[..., 0, 2] = gate_db[:-1, :-1]
+        polys[..., 1, 2] = gate_db[1:, :-1]
+        polys[..., 2, 2] = gate_db[1:, 1:]
+        polys[..., 3, 2] = gate_db[:-1, 1:]
+
+        avg_values[...] = (
+            gate_db[:-1, :-1]
+            + gate_db[1:, :-1]
+            + gate_db[1:, 1:]
+            + gate_db[:-1, 1:]
+        ) * 0.25
+
+        verts = polys.reshape(-1, 4, 3)
+        color_values = avg_values.reshape(-1)
+
+        if (
+            self._surface_norm.vmin != self.config.db_floor
+            or self._surface_norm.vmax != self.config.db_ceiling
+        ):
+            self._surface_norm.vmin = self.config.db_floor
+            self._surface_norm.vmax = self.config.db_ceiling
+
+        if self._surface is None or self._surface_shape != (cell_rows, cell_cols):
+            if self._surface is not None:
+                self._surface.remove()
+            surface = Poly3DCollection(verts, cmap=DEFAULT_COLORMAP, edgecolor="none")
+            surface.set_norm(self._surface_norm)
+            surface.set_array(color_values)
+            surface.set_clim(self.config.db_floor, self.config.db_ceiling)
+            surface.set_antialiased(False)
+            self.ax3d.add_collection(surface)
+            self._surface = surface
+            self._surface_shape = (cell_rows, cell_cols)
+        else:
+            self._surface.set_verts(verts)
+            self._surface.set_array(color_values)
+            self._surface.set_clim(self.config.db_floor, self.config.db_ceiling)
+            # Mark the collection stale so Matplotlib redraws it without reallocating.
+            self._surface.stale = True
+
         self.ax3d.set_xlim(start, end)
         self.ax3d.set_ylim(freqs[0], freqs[-1])
         self.ax3d.set_zlim(self.config.db_floor, self.config.db_ceiling)
