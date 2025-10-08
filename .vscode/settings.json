@@ -112,5 +112,8 @@
     },
 
     "jupyter.widgetScriptSources": [ "jsdelivr.com", "unpkg.com" ],
-    "workbench.editor.openSideBySideDirection": "right"
+    "workbench.editor.openSideBySideDirection": "right",
+    "[markdown]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    }
 }

@@ -3,6 +3,7 @@ import hvplot.pandas  # noqa: F401
 import pandas as pd
 import panel as pn
 
+
 pn.extension()  # default Bokeh backend
 
 df = pd.DataFrame({"t": range(100), "v": [i**0.5 for i in range(100)]})

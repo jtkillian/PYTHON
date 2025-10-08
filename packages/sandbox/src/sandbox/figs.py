@@ -7,6 +7,7 @@ from typing import Any
 
 import matplotlib.pyplot as plt
 
+
 # Lazy imports for Plotly
 try:
     import plotly.graph_objects as go
@@ -65,10 +66,10 @@ def _base_path(notebook_name: str, label: str | None) -> pathlib.Path:
 
 def save_best(
     notebook_name: str,
-    fig=None,
+    fig: Any | None = None,
     label: str | None = None,
     plotly_png_scale: float = 3.0,
-):
+) -> pathlib.Path:
     """
     Export a static snapshot:
       - Plotly with 3D traces -> high-DPI PNG
@@ -77,24 +78,27 @@ def save_best(
     Uses the specific object you pass (Figure, FigureWidget, Axes, or ipympl canvas).
     Falls back to pyplot's current figure only if `fig` is None.
     """
-    import pathlib
 
     base = _base_path(notebook_name, label)  # keep your existing helper
 
     # ------------ Plotly path (robust) ------------
     is_plotly = False
-    plotly_types = ()
+    plotly_types: tuple[type[Any], ...] = ()
     try:
         import plotly.graph_objects as go
 
-        plotly_types = (go.Figure, getattr(go, "FigureWidget", ()))
-        is_plotly = isinstance(fig, plotly_types)
+        plotly_types = (go.Figure,)
+        figure_widget = getattr(go, "FigureWidget", None)
+        if isinstance(figure_widget, type):
+            plotly_types = plotly_types + (figure_widget,)
+        if fig is not None:
+            is_plotly = isinstance(fig, plotly_types)
     except Exception:
         go = None  # not installed / unavailable
 
-    if is_plotly:
+    if fig is not None and is_plotly:
         # Detect 3D-ish traces
-        def _has_3d(f):
+        def _has_3d(f) -> bool:
             data = getattr(f, "data", ()) or ()
             for tr in data:
                 t = getattr(tr, "type", "") or ""
@@ -119,21 +123,22 @@ def save_best(
 
     # ------------ Matplotlib path (object-oriented) ------------
     # Normalize fig-like things (Figure, Axes, ipympl canvas) to a Figure
-    mpl_fig = None
-    try:
-        # If it's already a Figure
-        if hasattr(fig, "savefig"):
-            mpl_fig = fig
-        # ipympl canvas or Artist with .figure
-        elif hasattr(fig, "figure") and hasattr(fig.figure, "savefig"):
-            mpl_fig = fig.figure
-        # Axes -> parent Figure
-        elif hasattr(fig, "get_figure"):
-            maybe = fig.get_figure()
-            if hasattr(maybe, "savefig"):
-                mpl_fig = maybe
-    except Exception:
-        mpl_fig = None
+    mpl_fig: Any | None = None
+    if fig is not None:
+        try:
+            # If it's already a Figure
+            if hasattr(fig, "savefig"):
+                mpl_fig = fig
+            # ipympl canvas or Artist with .figure
+            elif hasattr(fig, "figure") and hasattr(fig.figure, "savefig"):
+                mpl_fig = fig.figure
+            # Axes -> parent Figure
+            elif hasattr(fig, "get_figure"):
+                maybe = fig.get_figure()
+                if hasattr(maybe, "savefig"):
+                    mpl_fig = maybe
+        except Exception:
+            mpl_fig = None
 
     if mpl_fig is not None:
         out = base.with_suffix(".pdf")
@@ -141,7 +146,6 @@ def save_best(
         return out
 
     # Fallback: save pyplot's CURRENT figure only if nothing was passed
-    import matplotlib.pyplot as plt
 
     out = base.with_suffix(".pdf")
     plt.gcf().savefig(out, format="pdf", bbox_inches="tight")
@@ -219,7 +223,11 @@ def save_buttons(notebook_name: str, fig: Any | None = None) -> None:
         except Exception as e:
             # Show error, then go back to ready state
             tb = traceback.format_exc()
-            msg.value = f"❌ <b>Error:</b> {e}<br><details><summary>Traceback</summary><pre>{tb}</pre></details>"
+            msg.value = (
+                f"❌ <b>Error:</b> {e}<br>"
+                "<details><summary>Traceback</summary>"
+                f"<pre>{tb}</pre></details>"
+            )
             btn.button_style = "danger"
             btn.description = "Failed"
             _reset_btn(after=1.0)

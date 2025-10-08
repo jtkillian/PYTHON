@@ -5,6 +5,7 @@ import hvplot.pandas  # noqa: F401  # registers the hvplot accessor
 import pandas as pd
 import panel as pn
 
+
 pn.extension()
 uploader = pn.widgets.FileInput(accept=".csv")
 plot_kind = pn.widgets.Select(name="Chart", options=["line", "scatter", "hist"])

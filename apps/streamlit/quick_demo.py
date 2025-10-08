@@ -2,6 +2,7 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+
 st.set_page_config(page_title="Streamlit Quick Demo", layout="wide")
 st.title("Streamlit + Plotly")
 

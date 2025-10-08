@@ -1,11 +1,31 @@
 line-length = 100
-src = ["src", "tests"]
+src = [
+	"packages/sandbox/src",
+	"packages/jdw-core/src",
+	"tests",
+]
+exclude = [
+	"apps/mu/**",
+]
 target-version = "py310"
 fix = true
 unsafe-fixes = true
 
 [lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "W", "C90", "N", "ANN"]
+
+[lint.per-file-ignores]
+"packages/sandbox/src/sandbox/figs.py" = ["ANN001", "ANN201", "ANN401", "C901"]
+"packages/sandbox/src/sandbox/nb_widgets.py" = [
+	"ANN001",
+	"ANN201",
+	"ANN202",
+	"C901",
+	"E402",
+	"N803",
+	"N806",
+	"SIM105",
+]
 
 [lint.isort]
 lines-after-imports = 2

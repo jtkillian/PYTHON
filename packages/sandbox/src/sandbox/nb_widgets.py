@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any, TypeAlias, cast
 
 import numpy as np
 
+
 # Optional SymPy import (works even if SymPy isn't installed)
 try:
     import sympy as sp  # type: ignore
@@ -28,18 +29,31 @@ else:
 
 
 # ---------- Ensure "<repo>/src" on sys.path so imports work from any notebook ----------
-def _ensure_src_on_sys_path() -> None:
+def _ensure_repo_paths_on_sys_path() -> None:
     here = Path.cwd()
     for p in (here, *here.parents):
         if (p / "pyproject.toml").exists() or (p / ".git").exists():
-            src = p / "src"
-            ssrc = str(src)
-            if ssrc not in sys.path:
-                sys.path.insert(0, ssrc)
+            candidates: list[Path] = []
+
+            packages_dir = p / "packages"
+            if packages_dir.exists():
+                for subdir in packages_dir.iterdir():
+                    src_dir = subdir / "src"
+                    if src_dir.exists():
+                        candidates.append(src_dir)
+
+            legacy_src = p / "src"
+            if legacy_src.exists():
+                candidates.append(legacy_src)
+
+            for path in candidates:
+                s_path = str(path)
+                if s_path not in sys.path:
+                    sys.path.insert(0, s_path)
             return
 
 
-_ensure_src_on_sys_path()
+_ensure_repo_paths_on_sys_path()
 
 
 # ---------- Notebook setup (safe in/without IPython) ----------

@@ -1,12 +1,14 @@
 [run]
 branch = True
 source =
-    src
+    packages/sandbox/src
+    packages/jdw-core/src
     tests
 
 [paths]
 source =
-    src
+    packages/sandbox/src
+    packages/jdw-core/src
     */src
 
 [report]
