@@ -1,0 +1,430 @@
+\documentclass[10pt]{article}
+
+% ===== Page + typography =====
+\usepackage[letterpaper,margin=0.2in]{geometry}     % ultra-tight margins
+\usepackage{multicol}                                % columns
+\usepackage{titlesec}                                % spacing for section headers
+\usepackage{enumitem}                                % compact itemize/enumerate
+\usepackage{ragged2e}                                % better ragged text
+\usepackage{setspace}                                % optional line spacing
+\usepackage{xcolor}                                  % color (optional for emphasis)
+
+% ===== Fonts (fix microtype expansion issue) =====
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% ===== Math + units =====
+\usepackage{amsmath, amssymb, mathtools}
+\usepackage{siunitx}
+\sisetup{per-mode=symbol, group-minimum-digits=4}
+
+% --- Custom SI units (Rankine) ---
+\DeclareSIUnit{\degreeRankine}{\SIUnitSymbolDegree R} % \si{\degreeRankine} → °R
+\DeclareSIUnit{\rankine}{R}                            % optional absolute Rankine → R
+
+% ===== Tables =====
+\usepackage{booktabs}
+\usepackage{tabularx}
+\newcolumntype{Y}{>{\RaggedRight\arraybackslash}X}
+
+% ===== Optional helpers =====
+\usepackage{bm}            % bold math
+\usepackage{microtype}     % must come AFTER fonts are set
+\usepackage{hyperref}      % links (optional)
+\hypersetup{hidelinks}
+
+% ===== (Optional) graphics for future figures =====
+\usepackage{graphicx}
+
+% ===== Look & spacing tweaks =====
+% NOTE: Tweak the global font-size here if needed:
+% \small, \footnotesize, \scriptsize
+\newcommand{\GlobalFontSize}{\scriptsize} % try \scriptsize; if still big, \tiny
+\AtBeginDocument{\GlobalFontSize}
+
+% Tighter section spacing:
+\titleformat{\section}{\bfseries\normalsize}{}{0pt}{}
+\titlespacing*{\section}{0pt}{2pt}{1pt}
+\titleformat{\subsection}{\bfseries\small}{}{0pt}{}
+\titlespacing*{\subsection}{0pt}{1pt}{0.5pt}
+\titleformat{\subsubsection}{\bfseries\small}{}{0pt}{}
+\titlespacing*{\subsubsection}{0pt}{1pt}{0.5pt}
+
+% Tighter lists:
+\setlist{nosep,leftmargin=*}
+\setlist[itemize]{itemsep=0pt,topsep=0pt,parsep=0pt}
+\setlist[enumerate]{itemsep=0pt,topsep=0pt,parsep=0pt}
+
+% Multicol tweaks (fewer column breaks):
+\setlength{\columnsep}{0.18in}
+\raggedcolumns
+
+\begin{document}
+
+\begin{center}
+\textbf{EGR-261: Thermodynamics — Comprehensive Study + Equation Sheet} \\
+\textbf{Jake Killian — Y2S1} \\
+\textbf{\today\ — Revision}
+\end{center}
+
+% ============================================================================
+\section{Basic Concepts \& Definitions (Ch. 1)}
+\begin{multicols}{2}
+
+\subsection{System Types}
+\begin{itemize}
+    \item \textbf{Closed (control mass):} fixed mass; energy can cross boundary; no mass flow.
+    \item \textbf{Open (control volume):} mass \emph{and} energy cross boundary (devices).
+    \item \textbf{Isolated:} no mass or energy interactions; $E,m$ constant.
+\end{itemize}
+\textbf{Boundary/Surroundings:} real/imaginary surface; surroundings = everything else. \\
+\textbf{State:} system condition identified by independent properties (simple compressible: 2 intensive props define state). \\
+\textbf{Process/Cycle:} path connecting states / returns to initial state. \\
+\textbf{Equilibrium:} Thermal (no $\Delta T$), Mechanical (no $\Delta P$), Phase, Chemical. \\
+\textbf{Properties:} Intensive (independent of mass), Extensive (scale with mass), Specific (per mass), e.g., specific volume $v=V/m$. \\
+\textbf{Zeroth Law:} if A and B are each in thermal equilibrium with C, then A is in thermal equilibrium with B $\Rightarrow$ temperature is well-defined. \\
+
+\subsection{Pressure/Temperature Conversions}
+\begin{itemize}
+    \item $P = F/A$
+    \item $P_{\text{abs}} = P_{\text{gauge}} + P_{\text{atm}}$
+    \item $T(\si{\kelvin}) = T(^{\circ}\mathrm{C}) + 273.15$
+    \item $T(\si{\degreeRankine}) = T(^{\circ}\mathrm{F}) + 459.67$
+    \item $T(^{\circ}\mathrm{F}) = \frac{9}{5}T(^{\circ}\mathrm{C})+32$
+\end{itemize}
+
+\subsection{Plain-Language Definitions (fast)}
+\begin{itemize}
+    \item \textbf{Internal energy $u$}: energy stored \emph{inside} the substance (microscopic modes).
+    \item \textbf{Enthalpy $h=u+Pv$}: “flow-friendly” energy; bundles $u$ with the $Pv$ term that shows up in open-system energy.
+    \item \textbf{Isobaric}: pressure held constant during the process.
+    \item \textbf{Isochoric} (isometric): volume held constant; no boundary work.
+    \item \textbf{Isothermal}: temperature held constant; for ideal gases, $u$ depends only on $T$ so $\Delta u=0$.
+    \item \textbf{Adiabatic}: no heat transfer ($Q=0$); for ideal gases, “adiabatic and reversible” $\Rightarrow$ \emph{isentropic}.
+    \item \textbf{Throttling} (valve): large pressure drop with negligible heat/work/KE/PE changes; \emph{isenthalpic} ($h_2=h_1$).
+\end{itemize}
+
+\end{multicols}
+% ============================================================================
+\section{Energy Forms \& Transfer (Ch. 2)}
+\begin{multicols}{2}
+
+\subsection*{Energy Definitions}
+\begin{itemize}
+    \item \textbf{Potential:} $PE = mgz$;\quad \textbf{Kinetic:} $KE=\tfrac12 mV^2$;\quad \textbf{Internal:} $U = m u$.
+    \item \textbf{Total:} $E = U + KE + PE$;\quad \textbf{Specific:} $e = u + \tfrac12 V^2 + gz$.
+    \item \textbf{Power:} $\dot W = dE/dt$ (W = J/s)
+\end{itemize}
+
+\subsection{Heat Transfer Modes (what \& how)}
+\begin{itemize}
+    \item \textbf{Conduction} (molecule-to-molecule): $\dot Q = -kA\,\dfrac{dT}{dx}$; $k$ [W/m·K].
+    \item \textbf{Convection} (fluid motion carries heat): $\dot Q = hA(T_f - T_s)$; $h$ [W/m$^2$·K].
+    \item \textbf{Radiation} (EM waves): $\dot Q = -\varepsilon\sigma A(T_s^4 - T_{sur}^4)$; $\sigma=5.67{\times}10^{-8}$ W/m$^2$·K$^4$.
+\end{itemize}
+Sign convention: heat \emph{into} system is $+$. \\
+
+\subsection{Work Transfer Modes (what \& how)}
+\begin{itemize}
+    \item \textbf{Moving Boundary:} $W = \int P\,dV$
+    \begin{itemize}
+        \item Isobaric $W=P(V_2 - V_1)$
+        \item Polytropic $PV^n=\text{const}$: $W=\dfrac{P_2V_2 - P_1V_1}{1-n}$ ($n\neq 1$);
+        \item Isochoric $W=0$.
+    \end{itemize}
+    \item \textbf{Shaft:} $W_{shaft}=\int T\,d\theta$;
+    \item \textbf{Electrical:} $W_e=-\int EI\,dt$ ($\dot W_e=-EI$);
+    \item \textbf{Spring:} $W_s=\tfrac12 k(x_2^2 - x_1^2)$.
+\end{itemize}
+Work \emph{out} of system is $+$. \\
+
+\subsection{Energy with Mass Flow}
+\begin{itemize}
+    \item \textbf{Specific enthalpy:} $h = u + P v$.
+    \item \textbf{Energy carried by mass:} $\dot E_{mass} = \dot m\!\left(h + \tfrac12 V^2 + gz\right)$.
+\end{itemize}
+
+\end{multicols}
+% ============================================================================
+\section{Properties, Phase Behavior, EOS (Ch. 3)}
+\begin{multicols}{2}
+
+\subsection{Phase \& Quality}
+\begin{itemize}
+    \item Quality $x$ (vapor mass fraction, valid only in 2-phase):
+    \[
+    x=\frac{m_{\text{vapor}}}{m_{\text{total}}}=\frac{v-v_f}{v_g - v_f}
+    \]
+    \item Mixture property interpolation: $y = (1-x)y_f + x y_g$ for $y\in\{v,u,h\}$ inside the dome.
+\end{itemize}
+
+\subsection{Phase Diagrams (how to recognize regions, no figure needed)}
+\begin{itemize}
+    \item \textbf{$T$--$v$ view}: A “dome” divides single-phase (outside) from 2-phase mix (inside). Left curve = saturated liquid, right curve = saturated vapor. The top point is the \emph{critical point}. Below the dome: mixture with quality $x$.
+    \item \textbf{$P$--$v$ view}: At a fixed $T$, an isotherm is a decreasing curve; the \emph{horizontal} plateau segment at $P_{\!sat}(T)$ is phase change (liquid$\leftrightarrow$vapor). Left of plateau: compressed liquid; plateau: mixture; right: superheated vapor.
+\end{itemize}
+
+\subsection{Tables: How \& When to Use}
+\begin{enumerate}
+    \item If $T,P$ given: compare $P$ with $P_{\text{sat}}(T)$.
+    \begin{itemize}
+        \item $P>P_{\text{sat}}$: compressed liquid;
+        \item $P=P_{\text{sat}}$: saturated (need $x$);
+        \item $P<P_{\text{sat}}$: superheated.
+    \end{itemize}
+    \item If $v$ given: check against $v_f,v_g$ at given $T$ or $P$.
+    \item Linear interpolation:\ $
+        \dfrac{Y-Y_1}{X-X_1}=\dfrac{Y_2-Y_1}{X_2-X_1}.
+    $
+    \item \textbf{Shortcuts \& validity:}
+    \begin{itemize}
+        \item \textbf{Compressed-liquid shortcut} (water): if $P$ is not extreme, use $v\!\approx v_f(T)$, $u\!\approx u_f(T)$, and $h\!\approx h_f(T)+v_f(T)\,\big(P-P_{\text{sat}}(T)\big)$.
+        \item \textbf{When ideal gas (IG) is acceptable}: gases at $P \lesssim 0.1\,P_c$ and $T \gtrsim 2\,T_c$ usually have $Z\approx 1$. Otherwise, use superheated tables or $Z$-charts.
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Ideal \& Real Gas}
+\begin{itemize}
+    \item Ideal-gas law:
+    \begin{itemize}
+        \item $PV=mRT$,\ $P\nu=RT$,\ $\dfrac{P_1\nu_1}{T_1}=\dfrac{P_2\nu_2}{T_2}$.
+        \item $R=\bar R/M$, $\bar R=\SI{8.314}{kJ/(kmol.K)}$.
+    \end{itemize}
+    \item Compressibility: $Z=\dfrac{P v}{RT}$, $Z{=}1$ (ideal).
+    \item Reduced: $T_R{=}T/T_c$, $P_R{=}P/P_c$ (for generalized $Z$).
+\end{itemize}
+
+\subsection{Specific Heats \& Relations}
+Definitions:
+\begin{itemize}
+    \item $c_p=\left(\dfrac{\partial h}{\partial T}\right)_p$,\quad
+    \item $c_v=\left(\dfrac{\partial u}{\partial T}\right)_v$,\quad
+    \item $k=\dfrac{c_p}{c_v}$.
+    \item  Ideal gas:
+    \begin{itemize}
+        \item $c_p=c_v+R$
+        \item $h_2-h_1=c_p\Delta T$; $u_2-u_1=c_v\Delta T$ (const-$c$ OK for $|\Delta T|\lesssim \SI{200}{K}$).
+    \end{itemize}
+    \item Incompressible (liquids/solids)
+    \begin{itemize}
+        \item $c_p\approx c_v=c$
+        \item $h_2-h_1=c\Delta T + v(P_2-P_1)$;
+        \item $u_2-u_1\approx c\Delta T$.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Mixtures \& Averages (mass vs. molar)}
+\begin{itemize}
+    \item \textbf{Mass fraction} $y_i=\dfrac{m_i}{\sum m_i}$,\quad \textbf{Mole fraction} $x_i=\dfrac{n_i}{\sum n_i}$, with $\sum y_i=\sum x_i=1$.
+    \item \textbf{Molar mass of mixture} $M_{\text{mix}}=\sum x_i M_i$;\quad \textbf{Gas constant} $R_{\text{mix}}=\dfrac{\bar R}{M_{\text{mix}}}$.
+    \item \textbf{Mass-average} specific property: $a_{\text{mix}}=\sum y_i\,a_i$ (units per kg).
+    \item \textbf{Molar-average} property: $\bar{a}_{\text{mix}}=\sum x_i\,\bar{a}_i$ (units per kmol).
+    \item For ideal-gas mixtures at low pressure: \textbf{Dalton’s law} $P=\sum P_i$ with $P_i=x_i P$.
+\end{itemize}
+
+\end{multicols}
+% ============================================================================
+\section{First Law \& Devices (Ch. 4)}
+\begin{multicols}{2}
+
+\subsection{Conservation of Mass}
+\begin{itemize}
+    \item General: $\dfrac{dm_{sys}}{dt}=\sum \dot m_{in}-\sum \dot m_{out}$
+    \item Steady: $\sum \dot m_{in}=\sum \dot m_{out}$.
+    \item 1D flow: $\dot m=\rho V A=\dfrac{V A}{v}$.
+\end{itemize}
+
+\subsection{Energy Balance (Control Volume, rate form)}
+\begin{itemize}
+    \item General: \\
+    \[
+    \frac{dE_{sys}}{dt}=\sum \dot m_{in}\!\left(h+\tfrac12V^2+gz\right)-
+    \sum \dot m_{out}\!\left(h+\tfrac12V^2+gz\right)+\dot Q-\dot W
+    \]
+    \item Steady, single-in/out: \\
+    $
+    \dot Q-\dot W=\dot m\!\left[(h_2-h_1)+\tfrac{V_2^2-V_1^2}{2}+g(z_2-z_1)\right].
+    $
+\end{itemize}
+
+\subsection{Devices (assumptions noted)}
+\begin{itemize}
+    \item \textbf{Nozzle/Diffuser (adiabatic, no shaft work, $\Delta PE\approx 0$):}
+    \begin{itemize}
+        \item $h_2-h_1+\dfrac{V_2^2-V_1^2}{2}=0$.
+    \end{itemize}
+    \item \textbf{Turbine (adiabatic, $\Delta KE,\Delta PE\approx 0$):}
+    \begin{itemize}
+        \item $\dot W=\dot m(h_1-h_2)$ (power out).
+    \end{itemize}
+    \item \textbf{Compressor/Pump (adiabatic, $\Delta KE,\Delta PE\approx 0$):}
+    \begin{itemize}
+        \item $\dot W=\dot m(h_2-h_1)$ (power in).
+    \end{itemize}
+    \item \textbf{Throttling Valve (no $Q,W$, $\Delta KE,\Delta PE\approx 0$):}
+    \begin{itemize}
+        \item $h_2=h_1$ (isenthalpic).
+    \end{itemize}
+    \item \textbf{Heat Exchanger (externally adiabatic, $\Delta KE,\Delta PE\approx 0$):}
+    \begin{itemize}
+        \item $\dot m_h(h_1-h_2)=\dot m_c(h_4-h_3)$.
+    \end{itemize}
+    \item \textbf{Mixing Chamber (adiabatic):}
+    \begin{itemize}
+        \item $\dot m_1h_1+\dot m_2h_2=(\dot m_1+\dot m_2)h_3$.
+    \end{itemize}
+\end{itemize}
+
+\subsection*{Device meanings (plain)}
+\begin{itemize}
+    \item \textbf{Nozzle/Diffuser}: swap enthalpy and velocity (pressure to speed, or speed to pressure) with minimal heat/work.
+    \item \textbf{Turbine}: converts fluid enthalpy into shaft power (work out).
+    \item \textbf{Compressor/Pump}: uses shaft power to raise fluid enthalpy/pressure (work in).
+    \item \textbf{Throttle valve}: big pressure drop at essentially constant enthalpy (useful for refrigeration flashes).
+    \item \textbf{Heat exchanger}: hot side enthalpy drop equals cold side enthalpy rise (externally adiabatic overall).
+    \item \textbf{Mixer}: enthalpy-weighted blend of streams into one outlet.
+\end{itemize}
+
+\textbf{[FIGURE 3: Device schematics $\to$ nozzle, diffuser, turbine, compressor, pump, valve, HX, mixer (icons/placeholders).]}
+
+\subsection{Performance}
+\begin{itemize}
+    \item Heat engine: $\eta=\dfrac{W_{out}}{Q_{in}}$
+    \item Refrigerator: $COP_R=\dfrac{Q_L}{W_{in}}$
+    \item Heat pump: $COP_{HP}=\dfrac{Q_H}{W_{in}}=COP_R+1$.
+\end{itemize}
+
+\end{multicols}
+% ============================================================================
+\section{Common Process Types (ideal gas cues)}
+\begin{multicols}{2}
+
+\begin{itemize}
+    \item \textbf{Isobaric} ($P$ const):
+    \begin{itemize}
+        \item $W=P(V_2-V_1)$;
+        \item horizontal in $P$--$v$.
+    \end{itemize}
+    \item \textbf{Isochoric} ($V$ const):
+    \begin{itemize}
+        \item $W=0$; vertical in $P$--$v$
+        \item $Q=\Delta u$.
+    \end{itemize}
+    \item \textbf{Isothermal} ($T$ const):
+    \begin{itemize}
+        \item $PV=$ const
+        \item hyperbola in $P$--$v$
+        \item IG: $\Delta u=0\Rightarrow Q=W$.
+    \end{itemize}
+    \item \textbf{Adiabatic} ($Q=0$IG $\approx$ isentropic):
+    \begin{itemize}
+        \item $PV^k=$ const
+        \item steeper than isothermal.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Isentropic (ideal gas, $k=c_p/c_v$)}
+\begin{itemize}
+    \item $ \displaystyle \frac{T_2}{T_1}=\left(\frac{P_2}{P_1}\right)^{\frac{k-1}{k}} \;=\; \left(\frac{v_1}{v_2}\right)^{\,k-1} $
+    \item $ \displaystyle \frac{P_2}{P_1}=\left(\frac{T_2}{T_1}\right)^{\frac{k}{k-1}} \;=\; \left(\frac{v_1}{v_2}\right)^{\,k} $
+    \item $ \displaystyle \frac{v_2}{v_1}=\left(\frac{T_2}{T_1}\right)^{\frac{1}{k-1}} \;=\; \left(\frac{P_1}{P_2}\right)^{\frac{1}{k}} $
+\end{itemize}
+\noindent
+\emph{Cues}: steeper than isothermal on $P$--$v$; for turbines (expansion) $T\downarrow,P\downarrow$; for compressors (compression) $T\uparrow,P\uparrow$.
+
+\textbf{[FIGURE 4: Typical $P$--$v$ paths $\to$ isobaric/isochoric/isothermal/adiabatic overlays.]}
+
+\end{multicols}
+% ============================================================================
+\section{Notation Guide (symbols \& usage)}
+\begin{multicols}{2}
+
+\begin{itemize}
+    \item $\dot{(\,)}$: time rate (e.g., $\dot Q$ in kW).
+    \item $\Delta$: change between labeled states (e.g., $\Delta h=h_2-h_1$; “2” is downstream or final).
+    \item Overbar $\bar{(\,)}$: context dependent: \emph{average} (e.g., $\bar{T}$) or \emph{molar} (e.g., $\bar R$); units reveal which.
+    \item Subscripts 1,2, in,out: use consistently on schematics and in equations; write balances \emph{with} those labels.
+    \item Primes ${}'$, ${}''$: saturated liquid ($'$) and saturated vapor ($''$) properties at the same $T$ or $P$.
+    \item $x$: quality (vapor mass fraction) in 2-phase only; use $y=(1-x)y_f+xy_g$.
+    \item Specific vs. molar: $u,h,v$ are per mass; molar forms use an overbar or “molar” label and kmol-based units.
+    \item \textbf{Signs}: heat \emph{into} system $+$; work \emph{out of} system $+$ (control-volume convention used here).
+\end{itemize}
+
+\end{multicols}
+% ============================================================================
+\section{Unit Conversions \& Derived Units (SI first, US second)}
+\begin{multicols}{2}
+
+\subsection{Base Conversions}
+\begin{itemize}
+    \item Length: $1~\si{in}=0.0254~\si{m}$;\ $1~\si{ft}=0.3048~\si{m}$.
+    \item Area: $1~\si{in^2}=6.4516{\times}10^{-4}~\si{m^2}$.
+    \item Volume: $1~\si{ft^3}=0.0283168~\si{m^3}$;\ $1~\si{L}=10^{-3}~\si{m^3}$;\ $1~\si{cm^3}=10^{-6}~\si{m^3}$.
+    \item Mass: $1~\si{lbm}=0.453592~\si{kg}$
+    \item Force: $1~\si{lbf}=4.44822~\si{N}$ (1 slug $=14.5939~\si{kg}$).
+    \item Pressure: $1~\si{atm}=101.325~\si{kPa}=14.696~\si{psi}$;\ $1~\si{bar}=100~\si{kPa}$.
+    \item Energy: $1~\si{Btu}=1.055~\si{kJ}$;\ $1~\si{ft\cdot lb}=1.356~\si{J}$.
+    \item Power: $1~\si{hp}=0.7457~\si{kW}$.
+    \item Temperature:
+    \begin{itemize}
+        \item ${}^{\circ}\mathrm{C}\leftrightarrow \si{\kelvin}$: add/subtract 273.15;\
+        \item ${}^{\circ}\mathrm{F}\leftrightarrow \si{\degreeRankine}$: add/subtract 459.67.
+        \item ${}^{\circ}\mathrm{C}\leftrightarrow {}^{\circ}\mathrm{F}$: $T(^{\circ}\mathrm{F})=\tfrac{9}{5}T(^{\circ}\mathrm{C})+32$.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Powers \& Prefixes}
+\begin{itemize}
+    \item $1~\si{cm}=10^{-2}~\si{m}\Rightarrow 1~\si{cm^3}=(10^{-2})^3\si{m^3}=10^{-6}~\si{m^3}$.
+    \item $1~\si{mm}=10^{-3}~\si{m}\Rightarrow 1~\si{mm^2}=10^{-6}~\si{m^2}$.
+    \item Prefixes: k ($10^3$), M ($10^6$), m ($10^{-3}$), $\mu$ ($10^{-6}$), n ($10^{-9}$).
+\end{itemize}
+
+\subsection{Derived Units}
+$\si{\pascal}=\si{\newton}/\si{m^2}$;\quad $\si{\newton}=\si{kg\cdot m/s^2}$;\quad $\si{\joule}=\si{\newton\cdot m}$;\quad $\si{\watt}=\si{\joule}/\si{s}$.
+
+\end{multicols}
+% ============================================================================
+\begin{multicols}{2}
+
+\section{Variables \& Symbols Summary (SI first; US in parentheses)}
+\begin{tabularx}{\linewidth}{l l l}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} & \textbf{SI / US} \\
+\midrule
+$P$ & Pressure & Pa, kPa, bar \ (psi) \\
+$T$ & Temperature & K, ${}^{\circ}$C \ (R, ${}^{\circ}$F) \\
+$V$ & Volume (total) & m$^3$ \ (ft$^3$) \\
+$v$ & Specific volume ($V/m$) & m$^3$/kg \ (ft$^3$/lbm) \\
+$\rho$ & Density ($1/v$) & kg/m$^3$ \ (slug/ft$^3$, lbm/ft$^3$) \\
+$m,\ \dot m$ & Mass, mass flow rate & kg, kg/s \ (lbm, lbm/s) \\
+$A$ & Area & m$^2$ \ (ft$^2$) \\
+$V$ (vel) & Velocity & m/s \ (ft/s) \\
+$z$ & Elevation & m \ (ft) \\
+$g$ & Gravitational accel. & 9.81 m/s$^2$ \ (32.174 ft/s$^2$) \\
+$u,\ h$ & Specific internal energy; enthalpy & kJ/kg \ (Btu/lbm) \\
+$c_v,\ c_p$ & Specific heats at $v,p$ & kJ/(kg·K) \ (Btu/(lbm·R)) \\
+$k$ & Ratio $c_p/c_v$ & -- \\
+$R,\ \bar R$ & Gas constant; universal gas constant & kJ/(kg·K);\ kJ/(kmol·K) \\
+$Q,\ \dot Q$ & Heat, heat rate & kJ, kW \ (Btu, Btu/h) \\
+$W,\ \dot W$ & Work, power & kJ, kW \ (Btu, hp, ft·lb/s) \\
+$k$ (cond.) & Thermal conductivity & W/(m·K) \ (Btu/(h·ft·R)) \\
+$h_{\text{conv}}$ & Convection coefficient & W/(m$^2$·K) \ (Btu/(h·ft$^2$·R)) \\
+$\varepsilon,\ \sigma$ & Emissivity; Stefan–Boltzmann & --; W/m$^2$·K$^4$ \\
+$x$ & Quality (vapor mass fraction) & -- \\
+$Z$ & Compressibility factor & -- \\
+\bottomrule
+\end{tabularx}
+
+% ============================================================================
+\section{Problem-Solving Checklist}
+1) Choose boundary (closed vs open); list assumptions (steady, adiabatic, negligible $\Delta KE,\Delta PE$). \\
+2) Identify region (compressed / saturated mix / superheated or ideal gas). \\
+3) Get properties (tables/EOS; compute $x$ if under dome). \\
+4) Apply mass balance (steady: in = out). \\
+5) Apply energy balance (pick device form). \\
+6) Solve for $Q,W,\dot m,T_2,V_2$; check sign convention. \\
+7) Sanity check (e.g., throttling $h_2=h_1$, nozzle adiabatic $\Rightarrow$ $h\downarrow$, $V\uparrow$). \\
+
+\end{multicols}
+\end{document}

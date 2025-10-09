@@ -1,0 +1,187 @@
+\documentclass[10pt]{article}
+
+% ---- Layout / typography ----
+\usepackage[a4paper,letterpaper,margin=0.5in]{geometry} % 0.5" margins on letter
+\usepackage{multicol}      % columns
+\usepackage{titlesec}      % tighter section spacing
+\usepackage{enumitem}      % compact lists
+\usepackage{microtype}     % better letterspacing
+\usepackage{parskip}       % optional: no paragraph indents (remove if not desired)
+
+% ---- Math & units ----
+\usepackage{amsmath, amssymb, mathtools}
+\usepackage{siunitx}       % \SI, \qty, units
+\sisetup{per-mode=symbol, group-minimum-digits=4}
+
+% ---- Tables ----
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{ragged2e}
+\newcolumntype{Y}{>{\RaggedRight\arraybackslash}X}
+
+% ---- Optional helpers ----
+\usepackage{bm}            % bold math (\bm)
+\usepackage{hyperref}      % links (optional)
+
+% ---- Look & spacing tweaks ----
+\setlength{\columnsep}{0.35in}
+\setlist{nosep,leftmargin=*}
+
+% Section style: bold, small caps, tight spacing
+\titleformat{\section}{\bfseries\large}{}{0pt}{}
+\titlespacing*{\section}{0pt}{4pt}{2pt}
+\titleformat{\subsection}{\bfseries}{}{0pt}{}
+\titlespacing*{\subsection}{0pt}{3pt}{1pt}
+
+\begin{document}\small  % overall smaller text; switch to \footnotesize or \scriptsize if needed
+
+\begin{center}
+\textbf{EGR-221: Statics - Equations Sheet} \\
+\textbf{Jake Killian - Y2S1} \\
+\textbf{{\today} - Revision} \\
+\end{center}
+
+% === Template ===
+%\subsection{}
+%\textbf{Eq:}
+%\textbf{Use:}
+%\textbf{Vars:}
+% === Template ===
+
+\section{Forces \& Resultants (Vectors)}
+\begin{multicols}{2}
+    \subsection{Resultant (Vector Sum)}
+    \textbf{Eq:} $F_R = \sum F$\\
+    \textbf{Use:} Combine multiple forces into a single resultant force\\
+    \textbf{Vars:} $F$ (force -- N, lb)\\[2pt]
+
+    \subsection{2D Components}
+    \textbf{Eq:} $F_x = F \cos\theta$, $\quad$ $F_y = F \sin\theta$\\
+    \textbf{Use:} Resolve a force into its 2D components\\
+    \textbf{Vars:} $F$ (force -- N, lb), $\theta$ (angle -- deg, rad)\\[2pt]
+
+    \subsection{3D Components}
+    \textbf{Eq:} $F = F_x \hat{i} + F_y \hat{j} + F_z \hat{k}$, $\quad$ $F_R = \left\langle \sum F_x, \sum F_y, \sum F_z \right\rangle$\\
+    \textbf{Use:} Resolve a force into its 3D components and sum by axis\\
+    \textbf{Vars:} $F_x, F_y, F_z$ (components -- N, lb); $\hat{i},\hat{j},\hat{k}$ (unit vectors)\\[2pt]
+
+    \subsection{Force Along a Line (Unit Vector)}
+    \textbf{Eq:} $\lambda_{AB}=\dfrac{r_B-r_A}{\lVert r_B-r_A\rVert}$, $\quad$ $F = T\,\lambda_{AB}$\\
+    \textbf{Use:} Put a tension $T$ along the line from $A$ to $B$\\
+    \textbf{Vars:} $T$ (tension -- N, lb), $\lambda_{AB}$ (unit direction), $r_A,r_B$ (position vectors -- m, ft)\\
+\end{multicols}
+
+\section{Moments of a Force (About a Point or Axis)}
+\begin{multicols}{2}
+    \subsection{Vector Moment About Point O}
+    \textbf{Eq:} $M_O = r \times F$\\
+    \textbf{Use:} Torque of $F$ about $O$; direction by right-hand rule\\
+    \textbf{Vars:} $r$ (position vector $O\!\to$ point of application -- m, ft), $F$ (force -- N, lb), $M_O$ (moment -- N$\cdot$m, ft$\cdot$lb)\\[2pt]
+
+    \subsection{Scalar Magnitude / Perpendicular Distance}
+    \textbf{Eq:} $|M_O| = F\,d_{\perp} = r\,F\,\sin\theta$\\
+    \textbf{Use:} Moment magnitude via force times shortest perpendicular distance\\
+    \textbf{Vars:} $F$ (N, lb), $d_{\perp}$ (lever arm -- m, in, ft), $\theta$ (deg, rad)\\[2pt]
+
+    \subsection{2D Scalar Moment Sum}
+    \textbf{Eq:} $M_O = \sum\!\left(x_i F_{iy} - y_i F_{ix}\right)$ \; (CCW $+$, CW $-$)\\
+    \textbf{Use:} Quick scalar moments about $O$ using components and lever arms\\
+    \textbf{Vars:} $x_i,y_i$ (coordinates -- m, ft), $F_{ix},F_{iy}$ (N, lb)\\[2pt]
+
+    \subsection{3D Rectangular Components}
+    \textbf{Eq:} $M_x = yF_z - zF_y$, \; $M_y = zF_x - xF_z$, \; $M_z = xF_y - yF_x$\\
+    \textbf{Use:} Compute $M=\langle M_x,M_y,M_z\rangle$ from $r\times F$ by components\\
+    \textbf{Vars:} $x,y,z$ (coords -- m, ft), $F_x,F_y,F_z$ (N, lb), $M_x,M_y,M_z$ (N$\cdot$m, ft$\cdot$lb)\\[2pt]
+
+    \subsection{Varignon's Theorem}
+    \textbf{Eq:} $r \times F \;=\; \sum\!\left(r \times \text{(components of }F)\right)$\\
+    \textbf{Use:} Take moments of simpler components to simplify geometry\\
+    \textbf{Vars:} $r$ (m, ft), $F$ (N, lb)\\[2pt]
+
+    \subsection{Moment About an Axis L}
+    \textbf{Eq:} $M_L = \lambda_L \cdot (r \times F)$\\
+    \textbf{Use:} Project moment onto axis $L$ (e.g., shaft/beam axis)\\
+    \textbf{Vars:} $\lambda_L$ (axis unit vector), $M_L$ (axis moment -- N$\cdot$m, ft$\cdot$lb)\\
+\end{multicols}
+
+\section{Couples \& Force-Couple Systems}
+\begin{multicols}{2}
+    \subsection{Couple Moment}
+    \textbf{Eq:} $M_c = F\,d_{\perp}$\\
+    \textbf{Use:} Pure rotation from equal/parallel/opposite forces; couples add as free vectors\\
+    \textbf{Vars:} $F$ (N, lb), $d_{\perp}$ (m, in, ft), $M_c$ (N$\cdot$m, ft$\cdot$lb)\\[2pt]
+
+    \subsection{Move a Force to a New Point (Add an Equivalent Couple)}
+    \textbf{Eq:} $\text{at }O:\; F,\; M_O = r_{OA}\times F$\\
+    \textbf{Use:} Replace force applied at $A$ by same force at $O$ plus couple to preserve moments\\
+    \textbf{Vars:} $r_{OA}$ (vector $O\!\to\!A$ -- m, ft), $M_O$ (N$\cdot$m, ft$\cdot$lb)\\[2pt]
+
+    \subsection{Shift of an Equivalent Force-Couple System}
+    \textbf{Eq:} $M_{O'} = M_O + (r_{O'O} \times R)$ \; with $R=\sum F$\\
+    \textbf{Use:} Change reference point; update net couple accordingly\\
+    \textbf{Vars:} $R$ (resultant force -- N, lb), $r_{O'O}$ (shift vector -- m, ft)\\[2pt]
+
+    \subsection{Coplanar Reduction to a Single Resultant on a Line}
+    \textbf{Eq:} $R=\sum F$, \; $M_O=\sum(x_iF_{iy}-y_iF_{ix})$, \; $x=\dfrac{M_O}{R}$\\
+    \textbf{Use:} Replace coplanar system by one force $R$ acting at offset $x$ from $O$ (sign via CCW+/CW$-$)\\
+    \textbf{Vars:} $R=|R|$ (N, lb), $x$ (m, in, ft), $x_i,y_i,F_{ix},F_{iy}$\\
+\end{multicols}
+
+\section{Rigid-Body Equilibrium}
+\begin{multicols}{2}
+    \subsection{2D Rigid Body Equilibrium}
+    \textbf{Eq:} $\sum F_x=0$, \; $\sum F_y=0$, \; $\sum M_A=0$\\
+    \textbf{Use:} Planar bodies/frames; choose $A$ to eliminate unknown reactions with $\sum M$ first\\
+    \textbf{Vars:} reactions $A_x,A_y$ (N, lb), $M_A$ (N$\cdot$m, ft$\cdot$lb), applied forces/geometry\\[2pt]
+
+    \subsection{3D Rigid Body Equilibrium}
+    \textbf{Eq:} $\sum F_x=\sum F_y=\sum F_z=0$, \; $\sum M_x=\sum M_y=\sum M_z=0$\\
+    \textbf{Use:} 3D frames/shafts; six scalar equations; pick origin to cancel terms\\
+    \textbf{Vars:} $F_x,F_y,F_z$ (N, lb), $M_x,M_y,M_z$ (N$\cdot$m, ft$\cdot$lb)\\
+\end{multicols}
+
+\section{Supports / Reaction Models}
+\textbf{Roller/Rocker:} one normal reaction $R_n$ (perpendicular to surface)\\
+\textbf{Smooth Pin/Hinge:} two reaction components $\left( A_x , A_y \right)$; no couple\\
+\textbf{Fixed Support:} two reaction components $\left( A_x , A_y \right)$, \textbf{plus} a reaction couple $M_z$\\
+\textbf{Cable/Rope:} tension $T$ along cable (pulls only, no compression)\\
+\textbf{Use:} build the correct unknowns on FBDs before writing $\sum M , \sum F$ equations
+
+\section{Variables: Meaning \& Units}
+\begin{tabularx}{\linewidth}{l Y l l}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} & \textbf{SI (preferred)} & \textbf{US} \\
+\midrule
+    $F$ & Force (vector, magnitude) & N & lb \\
+    $T$ & Tension (force) & N & lb \\
+    $W$ & Weight (force) & N & lb \\
+    $r$ & Position vector (from reference point to application point) & m & ft \\
+    $x, y, z$ & Coordinates & m & ft, in \\
+    $\theta, \alpha, \phi$ & Angles & rad or deg & rad or deg \\
+    $F_x, F_y, F_z$ & Force components & N & lb \\
+    $\lambda$ & Unit direction vector & -- & -- \\
+    $d_{\perp}$ & Perpendicular distance (lever arm) & m & ft, in \\
+    $M$ & Moment (vector, scalar) & N$\cdot$m & ft$\cdot$lb, in$\cdot$lb \\
+    $M_O$ & Moment about point $O$ & N$\cdot$m & ft$\cdot$lb \\
+    $M_x, M_y, M_z$ & Moment components & N$\cdot$m & ft$\cdot$lb \\
+    $M_L$ & Moment about axis $L$ & N$\cdot$m & ft$\cdot$lb \\
+    $M_c$ & Couple moment & N$\cdot$m & ft$\cdot$lb \\
+    $A_x, A_y, A_z$ & Reaction force components at a support & N & lb \\
+    $M_z$ & Reaction couple at a fixed support (2D) & N$\cdot$m & ft$\cdot$lb \\
+    $\hat{i}, \hat{j}, \hat{k}$ & Unit vectors in $x,y,z$ directions & -- & -- \\
+\bottomrule
+\end{tabularx}
+
+\section{Quick Use Guide}
+\begin{itemize}
+    \item $R = \sum F$: collapse many forces into one $\rightarrow$ then check equilibrium or do a force--couple reduction.
+    \item \textbf{Components} $F_x,F_y,F_z$: write scalar equilibrium equations cleanly.
+    \item $M_O = r \times F$, $|M| = F d_{\perp}$: compute torque about a point or size lever arms.
+    \item \textbf{Varignon}: take moments of components to simplify geometry.
+    \item $M_L = \lambda_L \cdot (r \times F)$: torque ``about an axis'' (projection).
+    \item $M_{O'} = M_O + (r_{O'O} \times R)$: shift reference point for the same system.
+    \item \textbf{2D}: $\sum F_x,\sum F_y,\sum M=0$ (start with $\sum M$ to eliminate unknowns). \textbf{3D}: six equations.
+    \item \textbf{Supports}: pick correct unknowns on the FBD so equations are solvable.
+\end{itemize}
+
+\end{document}
