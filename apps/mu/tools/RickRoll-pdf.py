@@ -1,3 +1,4 @@
+# python c:/Users/jkill/OneDrive/Desktop/JDW-DEV/GitHub/JDwinkle/PYTHON/apps/mu/tools/RickRoll-pdf.py input.pdf output.pdf --mode chunk/full --dpi 400
 import argparse
 import sys
 import fitz  # PyMuPDF
