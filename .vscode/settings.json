@@ -83,6 +83,28 @@
             ]
         },
         {
+            "name": "latexmk-xelatex",
+            "command": "latexmk",
+            "args": [
+                "-xelatex",
+                "-interaction=nonstopmode",
+                "-synctex=1",
+                "-outdir=build/%DOCFILE%",
+                "%DOC%"
+            ]
+        },
+        {
+            "name": "latexmk-lualatex",
+            "command": "latexmk",
+            "args": [
+                "-lualatex",
+                "-interaction=nonstopmode",
+                "-synctex=1",
+                "-outdir=build/%DOCFILE%",
+                "%DOC%"
+            ]
+        },
+        {
             "name": "tectonic",
             "command": "C:\\Users\\jkill\\tectonic.exe",
             "args": [
@@ -96,10 +118,12 @@
         }
     ],
     "latex-workshop.latex.recipes": [
+        { "name": "LuaLaTeX", "tools": [ "latexmk-lualatex" ] },
+        { "name": "XeLaTeX", "tools": [ "latexmk-xelatex" ] },
         { "name": "latexmk (pdf)", "tools": [ "latexmk" ] },
         { "name": "tectonic", "tools": [ "tectonic" ] }
     ],
-    "latex-workshop.latex.recipe.default": "lastUsed",
+    "latex-workshop.latex.recipe.default": "LuaLaTeX",
 
     "emeraldwalk.runonsave": {
         "commands": [
