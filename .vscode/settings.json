@@ -144,11 +144,11 @@
     }
   ],
   "latex-workshop.latex.recipes": [
-    { "name": "LuaLaTeX (minted)", "tools": ["latexmk-lualatex-minted"] },
-    { "name": "XeLaTeX (minted)",  "tools": ["latexmk-xelatex-minted"] },
-    { "name": "LuaLaTeX",          "tools": ["latexmk-lualatex"] },
-    { "name": "XeLaTeX",           "tools": ["latexmk-xelatex"] },
-    { "name": "tectonic",          "tools": ["tectonic"] }
+    { "name": "LuaLaTeX (minted)", "tools": [ "latexmk-lualatex-minted" ] },
+    { "name": "XeLaTeX (minted)", "tools": [ "latexmk-xelatex-minted" ] },
+    { "name": "LuaLaTeX", "tools": [ "latexmk-lualatex" ] },
+    { "name": "XeLaTeX", "tools": [ "latexmk-xelatex" ] },
+    { "name": "tectonic", "tools": [ "tectonic" ] }
   ],
   "latex-workshop.latex.recipe.default": "LuaLaTeX (minted)",
   "latex-workshop.latex.autoBuild.run": "onSave",
@@ -189,7 +189,19 @@
   // Project-local utilities
   // -----------------------------
   "cSpell.enabled": true,
-  "workbench.editor.openSideBySideDirection": "right"
+  "workbench.editor.openSideBySideDirection": "right",
+  "[latex]": {
+    "editor.defaultFormatter": "James-Yu.latex-workshop"
+  },
+  "[yaml]": {
+    "editor.defaultFormatter": "quarto.quarto"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[matlab]": {
+    "editor.defaultFormatter": "MathWorks.language-matlab"
+  }
 
   // -----------------------------
   // Inherit from GLOBAL:

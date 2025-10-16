@@ -59,3 +59,6 @@ quarto/build/**
 
 # Video files
 *.mp4
+
+/.quarto/
+**/*.quarto_ipynb
