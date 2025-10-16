@@ -1,143 +1,198 @@
+// ================================
+// LOCAL (workspace) settings.json
+// Scope: This repo only
+// Notes:
+// - Workspace-specific paths (venv), testing, Ruff, and LaTeX build chain
+// - Minted enabled via shell-escape recipes (LuaLaTeX/XeLaTeX)
+// - Fonts/UX live in GLOBAL to avoid drift
+// ================================
 {
-    "python.defaultInterpreterPath": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
-    "python.languageServer": "Pylance",
-    "python.analysis.typeCheckingMode": "basic",
-    "python.terminal.activateEnvironment": true,
+  // -----------------------------
+  // Python: interpreter & analysis (project venv)
+  // -----------------------------
+  "python.defaultInterpreterPath": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+  "python.languageServer": "Pylance",
+  "python.analysis.typeCheckingMode": "basic",
+  "python.terminal.activateEnvironment": true,
 
-    "editor.fontFamily": "Fira Code Retina",
-    "editor.fontLigatures": true,
-    "editor.fontSize": 12,
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "ms-python.black-formatter",
-    "editor.guides.bracketPairs": "active",
+  // -----------------------------
+  // Python: formatting (Black in this venv)
+  // -----------------------------
+  "editor.defaultFormatter": "ms-python.black-formatter",
+  "black-formatter.importStrategy": "fromEnvironment",
+  "black-formatter.interpreter": [
+    "${workspaceFolder}\\.venv\\Scripts\\python.exe"
+  ],
 
-    "black-formatter.importStrategy": "fromEnvironment",
-    "black-formatter.interpreter": [
-        "${workspaceFolder}\\.venv\\Scripts\\python.exe"
-    ],
+  // -----------------------------
+  // Python: testing (pytest in ./tests)
+  // -----------------------------
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestArgs": [
+    "tests"
+  ],
 
-    "terminal.integrated.cwd": "${workspaceFolder}",
-    "terminal.integrated.inheritEnv": true,
+  // -----------------------------
+  // Ruff (explicit on save for this repo)
+  // -----------------------------
+  "editor.codeActionsOnSave": {
+    "source.organizeImports.ruff": "explicit",
+    "source.fixAll.ruff": "explicit"
+  },
 
-    "terminal.integrated.profiles.windows": {
-        "Workspace venv (PYTHON)": {
-            "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
-            "args": [
-                "-NoExit",
-                "-Command",
-                "& \"${workspaceFolder}\\.venv\\Scripts\\Activate.ps1\""
-            ],
-            "icon": "terminal-powershell"
-        }
-    },
-    "terminal.integrated.defaultProfile.windows": "Workspace venv (PYTHON)",
-
-    "terminal.integrated.env.windows": {
-        "VIRTUAL_ENV": "${workspaceFolder}\\.venv",
-        "PATH": "${workspaceFolder}\\.venv\\Scripts;${env:PATH}"
-    },
-
-    "python.testing.pytestEnabled": true,
-    "python.testing.pytestArgs": [ "tests" ],
-
-    "editor.codeActionsOnSave": {
-        "source.organizeImports.ruff": "explicit",
-        "source.fixAll.ruff": "explicit"
-    },
-
-    "cSpell.enabled": true,
-    "todo-tree.general.tags": [ "TODO", "FIXME", "HACK", "NOTE" ],
-    "todo-tree.highlights.enabled": true,
-
-    "latex-workshop.latex.autoBuild.run": "onSave",
-    "latex-workshop.view.pdf.viewer": "tab",
-    "latex-workshop.view.pdf.trim": 0,
-    "latex-workshop.synctex.afterBuild.enabled": true,
-    "latex-workshop.view.pdf.internal.synctex.keybinding": "double-click",
-    "latex-workshop.latex.outDir": "build/%DOCFILE%",
-    "latex-workshop.latex.clean.fileTypes": [
-        "*.aux",
-        "*.bbl",
-        "*.bcf",
-        "*.blg",
-        "*.fdb_latexmk",
-        "*.fls",
-        "*.lof",
-        "*.log",
-        "*.lot",
-        "*.out",
-        "*.run.xml",
-        "*.toc",
-        "*.synctex.gz"
-    ],
-    "latex-workshop.latex.tools": [
-        {
-            "name": "latexmk",
-            "command": "latexmk",
-            "args": [
-                "-pdf",
-                "-interaction=nonstopmode",
-                "-synctex=1",
-                "-outdir=build/%DOCFILE%",
-                "%DOC%"
-            ]
-        },
-        {
-            "name": "latexmk-xelatex",
-            "command": "latexmk",
-            "args": [
-                "-xelatex",
-                "-interaction=nonstopmode",
-                "-synctex=1",
-                "-outdir=build/%DOCFILE%",
-                "%DOC%"
-            ]
-        },
-        {
-            "name": "latexmk-lualatex",
-            "command": "latexmk",
-            "args": [
-                "-lualatex",
-                "-interaction=nonstopmode",
-                "-synctex=1",
-                "-outdir=build/%DOCFILE%",
-                "%DOC%"
-            ]
-        },
-        {
-            "name": "tectonic",
-            "command": "C:\\Users\\jkill\\tectonic.exe",
-            "args": [
-                "-X",
-                "compile",
-                "%DOC%",
-                "--outdir",
-                "build/%DOCFILE%",
-                "--synctex"
-            ]
-        }
-    ],
-    "latex-workshop.latex.recipes": [
-        { "name": "LuaLaTeX", "tools": [ "latexmk-lualatex" ] },
-        { "name": "XeLaTeX", "tools": [ "latexmk-xelatex" ] },
-        { "name": "latexmk (pdf)", "tools": [ "latexmk" ] },
-        { "name": "tectonic", "tools": [ "tectonic" ] }
-    ],
-    "latex-workshop.latex.recipe.default": "LuaLaTeX",
-
-    "emeraldwalk.runonsave": {
-        "commands": [
-            {
-                "match": "notebooks/.*\\.ipynb$",
-                "isAsync": true,
-                "cmd": "code --command workbench.action.tasks.runTask -- 'Quarto: Render current notebook (HTML, PDF, DOCX)'"
-            }
-        ]
-    },
-
-    "jupyter.widgetScriptSources": [ "jsdelivr.com", "unpkg.com" ],
-    "workbench.editor.openSideBySideDirection": "right",
-    "[markdown]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
+  // -----------------------------
+  // Terminal: default to project venv
+  // -----------------------------
+  "terminal.integrated.cwd": "${workspaceFolder}",
+  "terminal.integrated.inheritEnv": true,
+  "terminal.integrated.profiles.windows": {
+    "Workspace venv (PYTHON)": {
+      "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "args": [
+        "-NoExit",
+        "-Command",
+        "& \"${workspaceFolder}\\.venv\\Scripts\\Activate.ps1\""
+      ],
+      "icon": "terminal-powershell"
     }
+  },
+  "terminal.integrated.defaultProfile.windows": "Workspace venv (PYTHON)",
+  "terminal.integrated.env.windows": {
+    "VIRTUAL_ENV": "${workspaceFolder}\\.venv",
+    "PATH": "${workspaceFolder}\\.venv\\Scripts;${env:PATH}"
+  },
+
+  // -----------------------------
+  // LaTeX Workshop: minted-ready toolchain (reproducible outDir)
+  // -----------------------------
+  "latex-workshop.latex.outDir": "build/%DOCFILE%",
+  "latex-workshop.latex.clean.fileTypes": [
+    "*.aux",
+    "*.bbl",
+    "*.bcf",
+    "*.blg",
+    "*.fdb_latexmk",
+    "*.fls",
+    "*.lof",
+    "*.log",
+    "*.lot",
+    "*.out",
+    "*.run.xml",
+    "*.toc",
+    "*.synctex.gz"
+  ],
+  "latex-workshop.latex.tools": [
+    {
+      "name": "latexmk-lualatex-minted",
+      "command": "latexmk",
+      "args": [
+        "-lualatex",
+        "-shell-escape",
+        "-interaction=nonstopmode",
+        "-synctex=1",
+        "-outdir=build/%DOCFILE%",
+        "%DOC%"
+      ]
+    },
+    {
+      "name": "latexmk-xelatex-minted",
+      "command": "latexmk",
+      "args": [
+        "-xelatex",
+        "-shell-escape",
+        "-interaction=nonstopmode",
+        "-synctex=1",
+        "-outdir=build/%DOCFILE%",
+        "%DOC%"
+      ]
+    },
+    {
+      "name": "latexmk-lualatex",
+      "command": "latexmk",
+      "args": [
+        "-lualatex",
+        "-interaction=nonstopmode",
+        "-synctex=1",
+        "-outdir=build/%DOCFILE%",
+        "%DOC%"
+      ]
+    },
+    {
+      "name": "latexmk-xelatex",
+      "command": "latexmk",
+      "args": [
+        "-xelatex",
+        "-interaction=nonstopmode",
+        "-synctex=1",
+        "-outdir=build/%DOCFILE%",
+        "%DOC%"
+      ]
+    },
+    {
+      // Tectonic is kept for projects NOT using minted
+      // (minted won't work with tectonic since it ignores shell-escape)
+      "name": "tectonic",
+      "command": "C:\\Users\\jkill\\tectonic.exe",
+      "args": [
+        "-X",
+        "compile",
+        "%DOC%",
+        "--outdir",
+        "build/%DOCFILE%",
+        "--synctex"
+      ]
+    }
+  ],
+  "latex-workshop.latex.recipes": [
+    { "name": "LuaLaTeX (minted)", "tools": ["latexmk-lualatex-minted"] },
+    { "name": "XeLaTeX (minted)",  "tools": ["latexmk-xelatex-minted"] },
+    { "name": "LuaLaTeX",          "tools": ["latexmk-lualatex"] },
+    { "name": "XeLaTeX",           "tools": ["latexmk-xelatex"] },
+    { "name": "tectonic",          "tools": ["tectonic"] }
+  ],
+  "latex-workshop.latex.recipe.default": "LuaLaTeX (minted)",
+  "latex-workshop.latex.autoBuild.run": "onSave",
+  "latex-workshop.view.pdf.viewer": "tab",
+  "latex-workshop.view.pdf.trim": 0,
+  "latex-workshop.synctex.afterBuild.enabled": true,
+  "latex-workshop.view.pdf.internal.synctex.keybinding": "double-click",
+
+  // -----------------------------
+  // Quarto/Notebook post-save automation (repo-local rule)
+  // -----------------------------
+  "emeraldwalk.runonsave": {
+    "commands": [
+      {
+        "match": "notebooks/.*\\.ipynb$",
+        "isAsync": true,
+        "cmd": "code --command workbench.action.tasks.runTask -- 'Quarto: Render current notebook (HTML, PDF, DOCX)'"
+      }
+    ]
+  },
+
+  // -----------------------------
+  // Jupyter security: allow widget CDNs for this repo
+  // -----------------------------
+  "jupyter.widgetScriptSources": [
+    "jsdelivr.com",
+    "unpkg.com"
+  ],
+
+  // -----------------------------
+  // Markdown (workspace preference)
+  // -----------------------------
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  // -----------------------------
+  // Project-local utilities
+  // -----------------------------
+  "cSpell.enabled": true,
+  "workbench.editor.openSideBySideDirection": "right"
+
+  // -----------------------------
+  // Inherit from GLOBAL:
+  // Fonts, ligatures, UI, Copilot, Data Wrangler, etc.
+  // -----------------------------
 }
