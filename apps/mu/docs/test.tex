@@ -1,0 +1,520 @@
+% ====================================================================
+% Universal Technical Preamble — All-On, Minted, Bibliography-Ready
+% Engine: LuaLaTeX / XeLaTeX  (Unicode stack: fontspec + unicode-math)
+% ====================================================================
+
+% ------------------------------------------------------------
+% Document class
+% ------------------------------------------------------------
+\documentclass[12pt]{article}
+
+% ------------------------------------------------------------
+% Fonts & Math (Unicode stack)
+%   - Do NOT load: amssymb, fontenc, lmodern (pdfLaTeX-era)
+%   - All math symbols come via unicode-math + chosen math font
+% ------------------------------------------------------------
+\usepackage{fontspec}      % system fonts
+\usepackage{amsmath}       % core math
+\usepackage{mathtools}     % amsmath extensions
+\usepackage{unicode-math}  % unicode-aware math (replaces amssymb)
+
+% Text / Sans / Mono
+\setmainfont{Libertinus Serif}
+\setsansfont{Libertinus Sans}
+\setmonofont{JetBrains Mono}[Contextuals=Alternate, Ligatures=TeX, Scale=MatchLowercase]
+
+% Math font compatible with unicode-math
+\setmathfont{Libertinus Math}
+
+% ------------------------------------------------------------
+% Page geometry, titling, headers/footers
+% ------------------------------------------------------------
+\usepackage[margin=1in]{geometry}
+\usepackage{titling}
+\usepackage{fancyhdr}
+\setlength{\headheight}{15.5pt}
+\pagestyle{fancy}
+\fancyhf{}
+
+% ------------------------------------------------------------
+% Micro-typography, color, and bookmarks
+% ------------------------------------------------------------
+\usepackage[protrusion=true]{microtype}   % safe with Lua/Xe
+\usepackage[dvipsnames]{xcolor}
+\usepackage[hidelinks]{hyperref}           % hyperlinks before bookmark/cleveref
+\usepackage{bookmark}                      % robust PDF bookmarks
+
+% Brand palette (adjust to taste)
+\definecolor{AccentColor}{HTML}{7B1113}
+\definecolor{AccentMuted}{HTML}{5C0D0F}
+\definecolor{AccentInk}{HTML}{111111}
+\definecolor{Highlighter}{HTML}{FFF59D}
+\definecolor{Alert}{HTML}{D32F2F}
+
+% ------------------------------------------------------------
+% Scientific typesetting (units, numbers, cancellation, helpers)
+% ------------------------------------------------------------
+\usepackage{cancel}
+\renewcommand{\CancelColor}{\color{red}}
+
+\usepackage{siunitx}  % v3 interface for numbers/units
+\sisetup{
+  detect-all,
+  per-mode = symbol,
+  separate-uncertainty = true,
+  exponent-product = \cdot,
+  group-minimum-digits = 4
+}
+% Extra units examples
+\DeclareSIUnit{\degreeRankine}{\SIUnitSymbolDegree R}
+\DeclareSIUnit{\rankine}{R}
+
+\usepackage{bm}        % bold math
+\usepackage{xfrac}     % nice slanted fractions \sfrac
+\usepackage{empheq}    % highlighted/boxed equations
+\usepackage{physics}   % \dv, \pdv, \qty, vectors, bras/kets (compatible with siunitx v3)
+
+% ------------------------------------------------------------
+% Graphics, plots, diagrams
+% ------------------------------------------------------------
+\usepackage{graphicx}
+\usepackage{float}
+
+\usepackage{caption}   % load BEFORE subcaption
+\usepackage{subcaption}
+
+% TikZ & libraries
+\usepackage{tikz}
+\usetikzlibrary{
+  arrows.meta,
+  calc,
+  positioning,
+  fit,
+  decorations.pathmorphing,
+  shapes,
+  patterns,
+  matrix,
+  quotes
+}
+
+% Circuit diagrams
+\usepackage[siunitx,RPvoltages]{circuitikz}
+
+% PGFPlots & data tables
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{pgfplotstable}
+
+% ------------------------------------------------------------
+% Tables & CSV
+% ------------------------------------------------------------
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{makecell}
+\usepackage{csvsimple}
+\usepackage{ragged2e}
+\newcolumntype{Y}{>{\RaggedRight\arraybackslash}X}
+
+% ------------------------------------------------------------
+% Lists, links, cross-references, URLs
+% ------------------------------------------------------------
+\usepackage{enumitem}
+\usepackage{xurl}                          % smart URL line-breaking
+\usepackage[nameinlink,capitalise,noabbrev]{cleveref}
+
+% ------------------------------------------------------------
+% PDF utilities, attachments, subfiles
+% ------------------------------------------------------------
+\usepackage{pdfpages}
+\usepackage{attachfile2}
+\usepackage{subfiles}                      % compile sections/chapters separately
+
+% ------------------------------------------------------------
+% Spacing, paragraphs, quotations
+% ------------------------------------------------------------
+\usepackage{setspace}
+\singlespacing
+\usepackage{indentfirst}
+\setlength{\parindent}{1.5em}
+\usepackage[autostyle,english=american]{csquotes}
+
+% ------------------------------------------------------------
+% Code listings — Minted preferred, Listings fallback if helper missing
+%   Requires: `python` + `latexminted` helper on PATH for Minted branch
+% ------------------------------------------------------------
+\newif\ifjdwUseMinted
+\jdwUseMintedfalse
+\IfFileExists{latexminted}{\jdwUseMintedtrue}{}
+\IfFileExists{latexminted.py}{\jdwUseMintedtrue}{}
+\IfFileExists{latexminted.exe}{\jdwUseMintedtrue}{}
+\IfFileExists{latexminted.bat}{\jdwUseMintedtrue}{}
+\IfFileExists{latexminted.cmd}{\jdwUseMintedtrue}{}
+
+\ifjdwUseMinted
+  \usepackage[newfloat,cache=false]{minted}
+  \usemintedstyle{friendly} % try 'monokai', 'xcode', 'borland' to taste
+  \setminted{
+    fontsize=\small,
+    breaklines,
+    autogobble,
+    tabsize=2,
+    frame=lines,
+    framesep=2mm,
+    baselinestretch=1,
+    linenos
+  }
+  % Optional language shortcuts when Minted is active
+  % \newminted{python}{}
+  % \newminted{bash}{}
+  % \newmintinline{python}{}
+\else
+  \usepackage{listings}
+  \lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=lines,
+    numbers=left,
+    numbersep=6pt,
+    tabsize=2,
+    showstringspaces=false,
+    columns=fullflexible
+  }
+  \PackageWarningNoLine{universal-tech-preamble}{`latexminted` helper not found; using listings fallback for code highlighting.}
+  \lstnewenvironment{minted}[2][]{%
+    \lstset{
+      language=#2,
+      frame=lines,
+      numbers=left,
+      numbersep=6pt,
+      breaklines=true,
+      basicstyle=\ttfamily\small,
+      tabsize=2
+    }%
+  }{}
+  \NewDocumentCommand{\mintinline}{mm}{\lstinline[language=#1]!#2!}
+\fi
+
+% ------------------------------------------------------------
+% Multicolumn, appendix, TOC control
+% ------------------------------------------------------------
+\usepackage{multicol}
+\setlength{\columnsep}{0.35in}
+\usepackage[toc,page]{appendix}
+\usepackage{tocloft}
+
+% ------------------------------------------------------------
+% Algorithms & Theorems
+% ------------------------------------------------------------
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+\usepackage{amsthm}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+
+% Nice boxes for notes/results
+\usepackage[skins,breakable]{tcolorbox}
+\tcbset{enhanced, sharp corners=all, boxsep=6pt}
+
+% ------------------------------------------------------------
+% Bibliography (modern) — biblatex + biber
+%   - Auto-fallback: if references.bib doesn't exist, create a tiny one
+%   - latexmk will run biber automatically
+% ------------------------------------------------------------
+\usepackage[backend=biber,style=ieee,sorting=none]{biblatex}
+
+% Fallback: create a minimal .bib if none is present so first compile works
+\ExplSyntaxOn
+\iow_new:N \g_jdw_default_bib_iow
+\ior_new:N \l_jdw_default_bib_ior
+
+\cs_new_protected:Npn \jdw_write_default_bib_line:n #1
+  { \iow_now:Nx \g_jdw_default_bib_iow {#1} }
+
+\cs_new_protected:Npn \jdw_create_default_bib:{%
+  \iow_open:Nn \g_jdw_default_bib_iow { references.bib }
+  \jdw_write_default_bib_line:n { @article\c_left_brace_str einstein1905, }
+  \jdw_write_default_bib_line:n { \c_space_tl\c_space_tl author\c_space_tl = \c_space_tl {Albert\space Einstein}, }
+  \jdw_write_default_bib_line:n { \c_space_tl\c_space_tl title\c_space_tl = \c_space_tl {Zur\space Elektrodynamik\space bewegter\space K{"o}rper}, }
+  \jdw_write_default_bib_line:n { \c_space_tl\c_space_tl journal\c_space_tl = \c_space_tl {Annalen\space der\space Physik}, }
+  \jdw_write_default_bib_line:n { \c_space_tl\c_space_tl year\c_space_tl = \c_space_tl {1905}, }
+  \jdw_write_default_bib_line:n { \c_space_tl\c_space_tl volume\c_space_tl = \c_space_tl {17}, }
+  \jdw_write_default_bib_line:n { \c_space_tl\c_space_tl pages\c_space_tl = \c_space_tl {891--921} }
+  \jdw_write_default_bib_line:n { \c_right_brace_str }
+  \iow_close:N \g_jdw_default_bib_iow
+}
+
+\cs_new_protected:Npn \jdw_ensure_default_bib:{%
+  \IfFileExists{references.bib}{%
+    \ior_open:Nn \l_jdw_default_bib_ior { references.bib }
+    \ior_if_eof:NTF \l_jdw_default_bib_ior
+      {
+        \ior_close:N \l_jdw_default_bib_ior
+        \jdw_create_default_bib:
+      }
+      {
+        \ior_close:N \l_jdw_default_bib_ior
+      }
+  }{\jdw_create_default_bib:}
+}
+
+\AtBeginDocument{\ExplSyntaxOn\jdw_ensure_default_bib:\ExplSyntaxOff}
+\ExplSyntaxOff
+\addbibresource{references.bib}
+
+% ------------------------------------------------------------
+% Document defaults & list spacing
+% ------------------------------------------------------------
+\numberwithin{equation}{section}
+\captionsetup{labelfont=bf}
+\setlist{itemsep=0.25em, topsep=0.25em, listparindent=\parindent}
+
+% ------------------------------------------------------------
+% Personalization toggle (header branding)
+% ------------------------------------------------------------
+\newif\ifpersonal
+\personaltrue
+\ifpersonal
+  \lhead{\textcolor{AccentColor!80!black}{Jake Killian}}
+  \rhead{\textcolor{gray}{\leftmark}}
+  \cfoot{\textcolor{gray}{\thepage}}
+\else
+  \rhead{\leftmark}
+  \cfoot{\thepage}
+\fi
+
+% ------------------------------------------------------------
+% Section heading styling (underline motif)
+% ------------------------------------------------------------
+\usepackage[explicit]{titlesec}
+\newcommand{\sectionline}{%
+  \par\vspace{0.1em}\noindent{\color{AccentMuted}\rule{2cm}{0.6pt}}\par
+}
+\newcommand{\subsectionline}{%
+  \par\vspace{0.1em}\noindent{\color{AccentMuted}\rule{1.5cm}{0.5pt}}\par
+}
+\ifpersonal
+  \titleformat{\section}{\LARGE\bfseries\color{AccentColor}}{\thesection}{0.75em}{#1\sectionline}
+  \titlespacing*{\section}{0pt}{1.5ex plus 0.5ex minus 0.2ex}{1.0ex}
+  \titleformat{\subsection}{\large\bfseries\color{AccentColor!85!black}}{\thesubsection}{0.6em}{#1\subsectionline}
+  \titlespacing*{\subsection}{0pt}{1.0ex plus 0.4ex minus 0.2ex}{0.8ex}
+\else
+  \titleformat{\section}{\Large\bfseries}{\thesection}{0.75em}{#1\sectionline}
+  \titleformat{\subsection}{\large\bfseries}{\thesubsection}{0.6em}{#1\subsectionline}
+\fi
+
+% ------------------------------------------------------------
+% Inline emphasis helpers
+% ------------------------------------------------------------
+\newcommand{\highlight}[1]{\colorbox{Highlighter}{#1}}
+\newcommand{\important}[1]{\textcolor{Alert}{\textbf{#1}}}
+
+% ------------------------------------------------------------
+% Hyperref colorization
+% ------------------------------------------------------------
+\hypersetup{
+  colorlinks=true,
+  linkcolor=AccentMuted,
+  citecolor=AccentMuted,
+  urlcolor=AccentColor
+}
+
+% ------------------------------------------------------------
+% Title rule helper (beneath \maketitle)
+% ------------------------------------------------------------
+\providecommand{\PrintTitleRule}{}
+\renewcommand{\PrintTitleRule}{%
+  \par\medskip
+  \begin{center}{\color{AccentColor}\rule{0.6\linewidth}{0.6pt}}\end{center}
+  \par\medskip
+}
+
+% ------------------------------------------------------------
+% Fancyhdr colored headrule
+% ------------------------------------------------------------
+\renewcommand{\sectionmark}[1]{\markboth{#1}{}}
+\makeatletter
+\renewcommand{\headrulewidth}{0.6pt}
+\def\headrule{{\color{AccentMuted}\hrule\@height\headrulewidth\@width\headwidth\relax}}
+\makeatother
+
+% ------------------------------------------------------------
+% Title metadata
+% ------------------------------------------------------------
+\pretitle{\begin{center}\LARGE}
+\title{JDW Universal LaTeX Build Test}
+\posttitle{\par\smallskip\Large Verifying Fonts, Packages, and Features\par\end{center}}
+\preauthor{\begin{center}\large}
+\author{Jake Killian}
+\postauthor{\par\end{center}}
+\predate{\begin{center}\large}
+\date{\today}
+\postdate{\par\end{center}}
+
+\begin{document}
+\maketitle
+\PrintTitleRule
+
+\tableofcontents
+\pagebreak
+
+% ------------------------------------------------------------
+\section{Font, Math, and Color Check}
+This section ensures Unicode fonts, math, and color palettes are correctly loaded.
+
+\textsf{Sans text}, \texttt{Monospace text}, and \textbf{Serif text} should all display cleanly.
+
+\subsection{Math Test}
+\[
+    E = mc^2 \quad\text{and}\quad \int_0^{\pi}\sin(x)\,dx = 2
+\]
+\[
+    \vec{a} = \begin{bmatrix}1\\2\\3\end{bmatrix}, \quad
+    \hat{n} = \frac{\vec{a}}{\|\vec{a}\|}, \quad
+    \nabla \cdot \vec{E} = \frac{\rho}{\varepsilon_0}
+\]
+\[
+    \boxed{\SI{3.5}{\kilo\gram\metre\per\square\second}} \quad
+    \text{(using \texttt{siunitx})}
+\]
+
+\highlight{Highlight example} and \important{Important text example.}
+
+% ------------------------------------------------------------
+\section{Minted (Code Syntax Highlighting)}
+Below is a Python code block rendered via \texttt{minted}.
+This verifies Pygments and shell escape are functional.
+
+\begin{minted}[fontsize=\small,breaklines,frame=lines,linenos]{python}
+import math
+
+def f(x):
+    """Sample test function"""
+    return math.sin(x) * math.exp(-x**2)
+
+for i in range(5):
+    print(f"x={i/10:.1f} -> f(x)={f(i/10):.4f}")
+\end{minted}
+
+Inline minted example: \mintinline{bash}{echo "Minted inline OK"}.
+
+% ------------------------------------------------------------
+\section{TikZ and PGFPlots}
+\begin{tikzpicture}[scale=0.9]
+  \draw[->] (-0.2,0) -- (4.2,0) node[right] {$x$};
+  \draw[->] (0,-0.2) -- (0,3.2) node[above] {$y$};
+  \draw[domain=0:4,smooth,variable=\x,AccentColor,thick] plot ({\x},{sin(\x r)+1.5});
+  \node[above right,AccentMuted] at (2,2) {$y=\sin(x)+1.5$};
+\end{tikzpicture}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.7\linewidth,
+  xlabel={$x$}, ylabel={$y=\sin(x)$},
+  grid=both, thick, AccentMuted
+]
+\addplot+[samples=100,AccentColor,thick] {sin(deg(x))};
+\end{axis}
+\end{tikzpicture}
+\caption{PGFPlots functional check}
+\end{figure}
+
+% ------------------------------------------------------------
+\section{Circuitikz Test}
+\begin{circuitikz}
+\draw (0,0) to[V, v=$V_{in}$, invert] (0,3)
+      to[R, l=$R_1$] (3,3)
+      to[C, l=$C_1$] (3,0) -- (0,0);
+\end{circuitikz}
+
+% ------------------------------------------------------------
+\section{Tables and CSV Import}
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}lcr@{}}
+\toprule
+Quantity & Symbol & Value \\
+\midrule
+Mass & $m$ & \SI{3.5}{\kilo\gram} \\
+Velocity & $v$ & \SI{25.0}{\metre\per\second} \\
+Energy & $E$ & \SI{1093.75}{\joule} \\
+\bottomrule
+\end{tabular}
+\caption{Standard \texttt{booktabs} table test.}
+\end{table}
+
+% CSV test (reads only if csvsample.csv exists)
+\IfFileExists{csvsample.csv}{
+  \csvautotabular{csvsample.csv}
+}{
+  \fbox{csvsample.csv not found; skipping CSV test.}
+}
+
+% ------------------------------------------------------------
+\section{Algorithm and Theorem}
+\begin{algorithm}[H]
+\SetAlgoLined
+\KwData{$a,b$ -- integers}
+\KwResult{$\gcd(a,b)$}
+\While{$b \ne 0$}{
+  $t \gets b$\;
+  $b \gets a \bmod b$\;
+  $a \gets t$\;
+}
+\Return{$a$}
+\caption{Euclidean Algorithm}
+\end{algorithm}
+
+\begin{theorem}[Pythagorean]
+For a right triangle with legs $a,b$ and hypotenuse $c$,
+\[ a^2 + b^2 = c^2. \]
+\end{theorem}
+
+\begin{proof}
+Classic proof via Euclidean geometry.
+\end{proof}
+
+% ------------------------------------------------------------
+\section{Tcolorbox and Multicolumn Layout}
+\begin{tcolorbox}[title=Note, colback=Highlighter!30, colframe=AccentMuted]
+This is a \texttt{tcolorbox} test — supports math:
+$\nabla \times \vec{E} = -\frac{\partial \vec{B}}{\partial t}$.
+\end{tcolorbox}
+
+\begin{multicols}{2}
+\begin{itemize}
+\item Left column bullet
+\item Demonstrates multicol environment
+\item Uses smaller spacing
+\end{itemize}
+\columnbreak
+\begin{enumerate}
+\item Right column
+\item Verifies spacing
+\end{enumerate}
+\end{multicols}
+
+% ------------------------------------------------------------
+\section{Citations and Bibliography}
+This verifies \texttt{biblatex} + \texttt{biber}.
+Sample citation: relativity paper~\cite{einstein1905}.
+
+\printbibliography
+
+% ------------------------------------------------------------
+\section{Appendix Test}
+\begin{appendices}
+\section{Additional Output}
+You can add figures, tables, or any additional material here.
+\end{appendices}
+
+\end{document}
