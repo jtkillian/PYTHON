@@ -1,27 +1,28 @@
 project:
   type: default
   title: "Python Sandbox"
-  # (Optional) Limit default renders to certain folders:
-  # render:
-  #   - notebooks/**/*.ipynb
-  #   - docs/**/*.qmd
+  output-dir: build
+  render:
+    - notebooks/**/*.qmd
+    - notebooks/**/*.ipynb
 
 execute:
-  echo: false
+  echo: true            # (for .ipynb) normal code+output
   warning: false
   error: false
-  cache: false       # set true for faster rebuilds while iterating
-  freeze: auto       # only re-render when source changes
-  dpi: 150
+  cache: false
+  freeze: auto
+  dpi: 300
   fig-width: 7
   fig-height: 4
   fig-align: center
 
 format:
   html:
-    theme: [cosmo, darkly]     # light/dark auto
-    css: styles.css            # ensures Fira Code in HTML code blocks
+    theme: [cosmo, darkly]
+    css: styles.css
     toc: true
+    toc-depth: 3
     toc-location: left
     code-fold: show
     code-tools: true
@@ -31,16 +32,23 @@ format:
     anchor-sections: true
     link-external-newwindow: true
     highlight-style: github
+
   pdf:
-    pdf-engine: lualatex        # needed for fontspec/unicode-math
-    include-in-header: _preamble.tex
+    pdf-engine: lualatex
+    include-in-header:
+      - _preamble.tex
+    listings: true            # make Pandoc use LaTeX listings
+    code-block-class: codeblock  # wrap each code block in our tcolorbox
     toc: true
-    number-sections: false
+    toc-depth: 3
+    number-sections: true
     geometry:
       - margin=1in
-    keep-tex: false             # set true if debugging PDF builds
+    keep-tex: false
+
   docx:
     toc: true
+
   revealjs:
     theme: serif
     slide-number: true

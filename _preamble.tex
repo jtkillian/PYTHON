@@ -1,0 +1,241 @@
+% ====================================================================
+% Quarto Header Preamble — LuaLaTeX + unicode-math (no minted)
+% Save as: _preamble.tex
+% ====================================================================
+
+% Consolidate options for packages Pandoc may load
+\makeatletter
+\PassOptionsToPackage{protrusion=true}{microtype}
+\PassOptionsToPackage{dvipsnames}{xcolor}
+\makeatother
+
+% Fonts & Math
+\usepackage{fontspec}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{unicode-math}
+
+\setmainfont{Libertinus Serif}
+\setsansfont{Libertinus Sans}
+\setmonofont{JetBrains Mono}[Contextuals=Alternate, Ligatures=TeX, Scale=MatchLowercase]
+\setmathfont{Libertinus Math}
+
+% Titling / headers
+\usepackage{titling}
+\usepackage{fancyhdr}
+\setlength{\headheight}{15.5pt}
+\pagestyle{fancy}
+\fancyhf{}
+\cfoot{\textcolor{gray}{\thepage}}
+
+% Microtype, colors, bookmarks, hyperlinks
+\makeatletter
+\@ifpackageloaded{microtype}{}{\usepackage{microtype}}
+\@ifpackageloaded{xcolor}{}{\usepackage{xcolor}}
+\makeatother
+\usepackage{bookmark}
+
+\definecolor{AccentColor}{HTML}{7B1113}
+\definecolor{AccentMuted}{HTML}{5C0D0F}
+\definecolor{AccentInk}{HTML}{111111}
+\definecolor{Highlighter}{HTML}{FFF59D}
+\definecolor{Alert}{HTML}{D32F2F}
+
+\makeatletter
+\@ifpackageloaded{hyperref}{%
+  \hypersetup{
+    colorlinks=true,
+    linkcolor=AccentMuted,
+    citecolor=AccentMuted,
+    urlcolor=AccentColor
+  }%
+}{}
+\makeatother
+
+% Scientific typesetting
+\usepackage{cancel}
+\renewcommand{\CancelColor}{\color{red}}
+\usepackage{siunitx}
+\sisetup{
+  detect-all,
+  per-mode = symbol,
+  separate-uncertainty = true,
+  exponent-product = \cdot,
+  group-minimum-digits = 4
+}
+\DeclareSIUnit{\degreeRankine}{\SIUnitSymbolDegree R}
+\DeclareSIUnit{\rankine}{R}
+\usepackage{bm}
+\usepackage{xfrac}
+\usepackage{empheq}
+\usepackage{physics}
+
+% Graphics & floats
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+
+% TikZ & libraries
+\usepackage{tikz}
+\usetikzlibrary{
+  arrows.meta, calc, positioning, fit,
+  decorations.pathmorphing, shapes, patterns,
+  matrix, quotes
+}
+
+% Circuit diagrams
+\usepackage[siunitx,RPvoltages]{circuitikz}
+
+% PGFPlots & tables
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{pgfplotstable}
+
+% Tables & CSV
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{makecell}
+\usepackage{csvsimple}
+\usepackage{ragged2e}
+\newcolumntype{Y}{>{\RaggedRight\arraybackslash}X}
+
+% Lists, URLs, cleveref
+\usepackage{enumitem}
+\usepackage{xurl}
+\usepackage[nameinlink,capitalise,noabbrev]{cleveref}
+
+% PDF utils, attachments, subfiles
+\usepackage{pdfpages}
+\usepackage{attachfile2}
+\usepackage{subfiles}
+
+% Spacing & quotes
+\usepackage{setspace}
+\singlespacing
+\usepackage{indentfirst}
+\setlength{\parindent}{1.5em}
+\usepackage[autostyle,english=american]{csquotes}
+
+% Multicolumn, appendix, TOC
+\usepackage{multicol}
+\setlength{\columnsep}{0.35in}
+\usepackage[toc,page]{appendix}
+% If tocloft ever hides your TOC, comment it out:
+\usepackage{tocloft}
+
+% Algorithms & theorems
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+\usepackage{amsthm}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+
+% Boxes
+\usepackage[most]{tcolorbox}
+\tcbset{enhanced, sharp corners=all, boxsep=6pt}
+
+% =========================
+% Code blocks in a tcolorbox (for PDF with listings)
+% =========================
+% Quarto sets listings=true for PDF; guard and style it, then wrap in a tcolorbox.
+\makeatletter
+\@ifpackageloaded{listings}{%
+  \lstset{
+    basicstyle=\ttfamily\small,
+    numbers=left,
+    numbersep=6pt,
+    breaklines=true,
+    columns=fullflexible,
+    showstringspaces=false
+  }
+}{\usepackage{listings}}
+\makeatother
+
+% Pretty tcolorbox-wrapped listings environment for Quarto's code-block-class
+\newtcblisting{codeblock}[1][]{%
+  enhanced,
+  breakable,
+  sharp corners=all,
+  colback=black!2,
+  colframe=AccentMuted,
+  boxrule=0.6pt,
+  top=3pt, bottom=3pt, left=4pt, right=4pt,
+  listing only,
+  listing options={%
+    basicstyle=\ttfamily\small,
+    numbers=left,
+    numbersep=6pt,
+    breaklines=true,
+    columns=fullflexible,
+    showstringspaces=false
+  },
+  title=\texttt{Code},
+  fonttitle=\bfseries\footnotesize,
+  #1
+}
+
+% Defaults
+\numberwithin{equation}{section}
+\captionsetup{labelfont=bf}
+\setlist{itemsep=0.25em, topsep=0.25em, listparindent=\parindent}
+
+% Fancyhdr headrule & section marks
+\renewcommand{\sectionmark}[1]{\markboth{#1}{}}
+\makeatletter
+\renewcommand{\headrulewidth}{0.6pt}
+\def\headrule{{\color{AccentMuted}\hrule\@height\headrulewidth\@width\headwidth\relax}}
+\makeatother
+
+% =========================
+% Section styling (titlesec)
+% =========================
+\usepackage[explicit]{titlesec}
+
+% Lines under headings
+\newcommand{\sectionline}{%
+  \par\vspace{0.1em}\noindent{\color{AccentMuted}\rule{2cm}{0.6pt}}\par
+}
+\newcommand{\subsectionline}{%
+  \par\vspace{0.1em}\noindent{\color{AccentMuted}\rule{1.5cm}{0.5pt}}\par
+}
+\newcommand{\subsubsectionline}{%
+  \par\vspace{0.1em}\noindent{\color{AccentMuted}\rule{1.2cm}{0.4pt}}\par
+}
+
+% Section levels
+\titleformat{\section}
+  {\LARGE\bfseries\color{AccentColor}}{\thesection}{0.75em}{#1\sectionline}
+\titlespacing*{\section}{0pt}{1.5ex plus 0.5ex minus 0.2ex}{1.0ex}
+
+\titleformat{\subsection}
+  {\large\bfseries\color{AccentColor!85!black}}{\thesubsection}{0.6em}{#1\subsectionline}
+\titlespacing*{\subsection}{0pt}{1.0ex plus 0.4ex minus 0.2ex}{0.8ex}
+
+\titleformat{\subsubsection}
+  {\normalsize\bfseries\color{AccentColor!70!black}}{\thesubsubsection}{0.6em}{#1\subsubsectionline}
+\titlespacing*{\subsubsection}{0pt}{0.8ex plus 0.3ex minus 0.2ex}{0.6ex}
+
+% Lower levels (run-in)
+\titleformat{\paragraph}[runin]{\bfseries}{\theparagraph}{0.5em}{#1}
+\titlespacing*{\paragraph}{0pt}{0.6ex}{1em}
+\titleformat{\subparagraph}[runin]{\bfseries\itshape}{\thesubparagraph}{0.5em}{#1}
+\titlespacing*{\subparagraph}{0pt}{0.4ex}{1em}
+
+% Make numbering and TOC depth stick
+\AtBeginDocument{%
+  \setcounter{secnumdepth}{3}% number down to subsubsection
+  \setcounter{tocdepth}{3}%   include down to subsubsection in TOC
+}
+
+% Inline emphasis helpers
+\newcommand{\highlight}[1]{\colorbox{Highlighter}{#1}}
+\newcommand{\important}[1]{\textcolor{Alert}{\textbf{#1}}}
